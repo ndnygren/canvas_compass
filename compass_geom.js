@@ -43,12 +43,17 @@ function CTNode(input) {
 	this.pointValid = function() {
 		if (this.name != "point") { return false; }
 		else if (this.child.length != 2) { return false; }
-		else if (!isNaN(this.child[0].name) && !isNaN(this.child[1].name))
-		{
-			return true;
-		}
-
+		else if (!isNaN(this.child[0].name)
+				&& !isNaN(this.child[1].name))
+		{ return true; }
+		else if (this.child[0].lineOrCircleValid()
+				&& this.child[1].lineOrCircleValid())
+		{ return true; }
 		return false;
+	}
+
+	this.lineOrCircleValid = function() {
+		return this.lineValid() || this.circleValid();
 	}
 
 	this.lineValid = function() {
@@ -59,7 +64,8 @@ function CTNode(input) {
 
 	this.circleValid = function() {
 		if (this.name != "circle") { return false; }
-		return true;
+		else if (this.child.length != 2) { return false; }
+		return this.child[0].pointValid() && this.child[1].pointValid();
 	}
 }
 
@@ -111,6 +117,29 @@ function ConstructParse() {
 		}
 		return output;
 	}
+}
+
+function geomTests() {
+	var gt = this;
+	this.tests = [];
+
+	this.validityExamples = function(input, answer) {
+		var cp = new ConstructParse();
+		return cp.read(input).child[0].geomValid() == answer;
+	}
+
+	this.runTests = function() {
+		return this.tests.map(function(x) { return x();});
+	}
+
+	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });
+	this.tests.push(function() { return gt.validityExamples(" line(point(a,0), point(0,1)) ", false); });
+	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,a)) ", false); });
+	this.tests.push(function() { return gt.validityExamples(" line(0,1) ", false); });
+	this.tests.push(function() { return gt.validityExamples(" point(0,1) ", true); });
+	this.tests.push(function() { return gt.validityExamples(" circle(0,1) ", false); });
+	this.tests.push(function() { return gt.validityExamples(" circle(point(),1) ", false); });
+	this.tests.push(function() { return gt.validityExamples(" circle(point(2,3),point(line(point(3,6),point(3,45)), circle(point(2,4),point(3,5)))) ", true); });
 }
 
 

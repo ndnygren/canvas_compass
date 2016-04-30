@@ -24,9 +24,10 @@
 	<script type="text/javascript">
 		function loadInput() {
 			var cp = new ConstructParse();
+			var gt = new geomTests();
 			var input_text = document.getElementById("input_box").value;
 			document.getElementById("output_div").innerHTML = cp.htmlDebug(cp.read(input_text));
-			document.getElementById("test_div").innerHTML = cp.read(input_text).child[0].geomValid();
+			document.getElementById("test_div").innerHTML = gt.runTests();
 			return false;
 		}
 	</script>

@@ -9,6 +9,7 @@ function assocFoldr(list, func) {
 	}
 	return output
 }
+
 function zippr(lhs, rhs, func) {
 	if (lhs.length != rhs.length) {throw("zipping non-equal lengths");}
 	var output = [];
@@ -119,6 +120,48 @@ function ConstructParse() {
 	}
 }
 
+function ProjectiveCalc() {
+	this.gauss_elim = function(mtx) {
+		for(var k = 0; k < mtx.length; k++) {
+		}
+	}
+
+	this.pointNumeric = function(x,y) {
+		return {"type": "point",
+			"x":parseFloat(x),
+			"y":parseFloat(y)
+		};
+	}
+
+	this.lineFrom2Points = function(a, b) {
+		if (a.x==b.x && a.y==b.y) {throw("Need distinct points to make a line.")}
+		return {"type":"line",
+			"x1":a.x,
+			"y1":a.y,
+			"x2":b.x,
+			"y2":b.y
+		};
+	}
+
+	this.heightOnLine = function(x, line) {
+		if (line.x1 == line.x2) { throw("Vertical line."); }
+		return (line.y2 - line.y1)/(line.x2 - line.x1)*(x - line.x1) + line.y1;
+	}
+
+	this.pointFrom2Lines = function(a,b) {
+		var sa = a.y2 - a.y1; //rise on a
+		var sb = b.y2 - b.y1; //rise on b
+		var na = a.x2 - a.x1; //run on a
+		var nb = b.x2 - b.x1; //run on b
+		var ma = na*a.y1 - sa*a.x1 // tidy up a
+		var mb = nb*b.y1 - sb*b.x1 // tidy up b
+		if (sa*nb == sb*na) { throw("Parallel lines.");}
+		var newx = (nb*ma - na*mb) / (na*sb - nb*sa);
+		var newy = na!=0 ? this.heightOnLine(newx, a) : this.heightOnLine(newx, b);
+		return {"type":"point", "x":newx,"y":newy};
+	}
+}
+
 function geomTests() {
 	var gt = this;
 	this.tests = [];
@@ -140,6 +183,13 @@ function geomTests() {
 	this.tests.push(function() { return gt.validityExamples(" circle(0,1) ", false); });
 	this.tests.push(function() { return gt.validityExamples(" circle(point(),1) ", false); });
 	this.tests.push(function() { return gt.validityExamples(" circle(point(2,3),point(line(point(3,6),point(3,45)), circle(point(2,4),point(3,5)))) ", true); });
+	this.tests.push(function() {
+		var pc = new ProjectiveCalc();
+		var p1 = pc.pointFrom2Lines(
+			{"type":"line", "x1":0, "y1":0, "x2":0, "y2":2},
+			{"type":"line", "x1":3, "y1":0, "x2":1, "y2":1});
+		return p1.x == 0 && p1.y == 1.5;
+	});
 }
 
 

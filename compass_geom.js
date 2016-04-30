@@ -32,6 +32,35 @@ function CTNode(input) {
 			return a.equalTo(b);
 		}), function (a,b) { return a && b; } );
 	}
+
+	this.geomValid = function() {
+		if (this.name == "point") { return this.pointValid(); }
+		else if (this.name == "line") { return this.lineValid(); }
+		else if (this.name == "circle") { return this.circleValid(); }
+		else { return false; }
+	}
+
+	this.pointValid = function() {
+		if (this.name != "point") { return false; }
+		else if (this.child.length != 2) { return false; }
+		else if (!isNaN(this.child[0].name) && !isNaN(this.child[1].name))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	this.lineValid = function() {
+		if (this.name != "line") { return false; }
+		else if (this.child.length != 2) { return false; }
+		return this.child[0].pointValid() && this.child[1].pointValid();
+	}
+
+	this.circleValid = function() {
+		if (this.name != "circle") { return false; }
+		return true;
+	}
 }
 
 function ConstructParse() {
@@ -48,7 +77,7 @@ function ConstructParse() {
 		var tree = new CTNode("top");
 		var stack = [tree];
 		var tokens = [",", "(", ")"];
-		var str = " mid   (  banana , orange  (  pineapple )  , avacado ) ";
+		var str = input;
 		var cur = 0, next = this.nextToken(str, cur, tokens);
 		var newtoken = "";
 		for (cur = 0; cur < str.length && cur >= 0; next = this.nextToken(str, cur, tokens)) {

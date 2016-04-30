@@ -3,6 +3,7 @@
 	<head>
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 		<meta content="utf-8" http-equiv="encoding">
+		<script type="text/javascript" src="compass_geom.js"></script>
 		<title>Geom</title>
 		<link href="style.css" rel="stylesheet" type="text/css" />
 	</head>
@@ -11,11 +12,17 @@
 		<h2>Enter Construction:</h2>
 		<div id="main_content_div" class="outer_div">
 			<div class="inner_div">
-				One
+				<textarea id="input_box"></textarea>
 			</div>
 			<div class="inner_div">
 				Two
 			</div>
 		</div>
+		<div id="output_div" class="outer_div"></div>
 	</body>
+	<script type="text/javascript">
+		var cp = new ConstructParse();
+		var input_text = document.getElementById("input_box").value;
+		document.getElementById("output_div").innerHTML = cp.htmlDebug(cp.read(input_text));
+	</script>
 </html>

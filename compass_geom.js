@@ -162,13 +162,13 @@ function ProjectiveCalc() {
 		if (sa*nb == sb*na) { throw("Parallel lines.");}
 		var newx = (nb*ma - na*mb) / (na*sb - nb*sa);
 		var newy = na!=0 ? this.heightOnLine(newx, a) : this.heightOnLine(newx, b);
-		return {"type":"point", "x":newx,"y":newy};
+		return this.pointNumeric(newx, newy);
 	}
 
 	this.fwdLineParam = function(line, t) {
 		var s = line.y2 - line.y1; //rise
 		var n = line.x2 - line.x1; //run
-		return {"type":"point", "x":n*t + line.x1, "y":s*t + line.y1};
+		return this.pointNumeric(n*t + line.x1, s*t + line.y1);
 	}
 
 	this.revLineParam = function(line, point) {
@@ -195,14 +195,56 @@ function ProjectiveCalc() {
 		var y2 = (a.y+b.y)/2 + (b.y-a.y)*(a.r*a.r - b.r*b.r)/(2*D*D)
 			+ 2*(a.x-b.x)*delta/D/D;
 		//console.log("("+x1+","+y1+"),"+"("+x2+","+y2+")");
-		return [{"type":"point", "x":x1, "y":y1},
-			{"type":"point", "x":x2, "y":y2}]
+		return [this.pointNumeric(x1,y1),
+			this.pointNumeric(x2, y2)];
 	}
 
 	this.pointFrom2Circles = function(a,b) {
 		var points = this.pointsFrom2Circles(a,b);
 		if (points.length == 0) { throw("These circles do not intersect."); }
 		return points[0];
+	}
+
+	this.sign = function(x) { return x < 0 ? -1 : 1; }
+
+	this.pointsFromLineCircle = function(line, circle) {
+		if (line.type != "line" || circle.type != "circle") {
+			throw("type error for lines and circles.");
+		}
+		var d = this.d_euclid(this.pointNumeric(line.x1,line.y1),
+			this.pointNumeric(line.x2, line.y2));
+		var dx = line.x2-line.x1;
+		var dy = line.y2-line.y1;
+		var D = (line.x1-circle.x)*(line.y2-circle.y)
+			- (line.x2-circle.x)*(line.y1-circle.y);
+		if (circle.r*circle.r*d*d - D*D < 0) { return []; }
+
+		var x1 = (D*dy
+			+ this.sign(dy)*dx*
+				Math.sqrt(circle.r*circle.r*d*d - D*D))
+			/ (d*d) + circle.x;
+		var x2 = (D*dy - this.sign(dy)*dx*Math.sqrt(circle.r*circle.r*d*d - D*D))
+			/ (d*d) + circle.x;
+		var y1 = (-D*dx + Math.abs(dy)*Math.sqrt(circle.r*circle.r*d*d - D*D))
+			/ (d*d) + circle.y;
+		var y2 = (-D*dx - Math.abs(dy)*Math.sqrt(circle.r*circle.r*d*d - D*D))
+			/ (d*d) + circle.y;
+		//console.log("("+x1+","+y1+"),"+"("+x2+","+y2+")");
+
+		return [this.pointNumeric(x1, y1),
+		       this.pointNumeric(x2, y2)];
+	}
+
+	this.pointFromLineCircle = function(line, circle) {
+		var points = this.pointsFromLineCircle(line, circle);
+		if (points.length == 0) { throw("No intersection between line and circle."); }
+		if (points.length == 1) { return points[0]; }
+		else if (this.revLineParam(line, points[0])
+				< this.revLineParam(line, points[1])) {
+			return points[0];
+		} else {
+			return points[1];
+		}
 	}
 }
 
@@ -258,6 +300,22 @@ function geomTests() {
 		var c2 = {"type":"circle", "x":1, "y": 1, "r":1};
 		var p1 = pc.pointFrom2Circles(c1,c2);
 		return Math.abs(p1.x-0) < 0.01 && Math.abs(p1.y-1) < 0.01;
+	});
+	this.tests.push(function() {
+		var pc = new ProjectiveCalc();
+		var c1 = {"type":"circle", "x":2, "y": 1, "r":1};
+		var l1 = {"type":"line", "x1": 5, "y1": 5, "x2":6, "y2":6};
+		var p1 = pc.pointFromLineCircle(l1,c1);
+
+		return Math.abs(p1.x-1) < 0.01 && Math.abs(p1.y-1) < 0.01;
+	});
+	this.tests.push(function() {
+		var pc = new ProjectiveCalc();
+		var c1 = {"type":"circle", "x":2, "y": 1, "r":1};
+		var l1 = {"type":"line", "x1": 5, "y1": 5, "x2":-1, "y2":-1};
+		var p1 = pc.pointFromLineCircle(l1,c1);
+
+		return Math.abs(p1.x-2) < 0.01 && Math.abs(p1.y-2) < 0.01;
 	});
 }
 

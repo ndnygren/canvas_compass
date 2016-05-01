@@ -160,6 +160,18 @@ function ProjectiveCalc() {
 		var newy = na!=0 ? this.heightOnLine(newx, a) : this.heightOnLine(newx, b);
 		return {"type":"point", "x":newx,"y":newy};
 	}
+
+	this.fwdLineParam = function(line, t) {
+		var s = line.y2 - line.y1; //rise
+		var n = line.x2 - line.x1; //run
+		return {"type":"point", "x":n*t + line.x1, "y":s*t + line.y1};
+	}
+
+	this.revLineParam = function(line, point) {
+		var s = line.y2 - line.y1; //rise
+		var n = line.x2 - line.x1; //run
+		return n != 0 ? (point.x - line.x1)/n : (point.y - line.y1)/s;
+	}
 }
 
 function geomTests() {
@@ -189,6 +201,18 @@ function geomTests() {
 			{"type":"line", "x1":0, "y1":0, "x2":0, "y2":2},
 			{"type":"line", "x1":3, "y1":0, "x2":1, "y2":1});
 		return p1.x == 0 && p1.y == 1.5;
+	});
+	this.tests.push(function() {
+		var pc = new ProjectiveCalc();
+		var line = {"type":"line", "x1":1, "y1": 1, "x2":3, "y2":2};
+		var p1 = pc.fwdLineParam(line, 3);
+		return p1.x == 7 && p1.y == 4;
+	});
+	this.tests.push(function() {
+		var pc = new ProjectiveCalc();
+		var line = {"type":"line", "x1":1, "y1": 1, "x2":3, "y2":2};
+		var p1 = {"type":"point", "x":7, "y": 4};
+		return pc.revLineParam(line, p1) == 3;
 	});
 }
 

@@ -143,6 +143,10 @@ function ProjectiveCalc() {
 		};
 	}
 
+	this.circleFrom2Points = function(p1,p2) {
+		return {"type":"circle", "x":p1.x ,"y": p1.y, "r": this.d_euclid(p1,p2)};
+	}
+
 	this.heightOnLine = function(x, line) {
 		if (line.x1 == line.x2) { throw("Vertical line."); }
 		return (line.y2 - line.y1)/(line.x2 - line.x1)*(x - line.x1) + line.y1;
@@ -171,6 +175,34 @@ function ProjectiveCalc() {
 		var s = line.y2 - line.y1; //rise
 		var n = line.x2 - line.x1; //run
 		return n != 0 ? (point.x - line.x1)/n : (point.y - line.y1)/s;
+	}
+
+	this.d_euclid = function(p1, p2) {
+		return Math.sqrt((p1.x-p2.x)*(p1.x-p2.x) +
+				(p1.y-p2.y)*(p1.y-p2.y));
+	}
+
+	this.pointsFrom2Circles = function(a,b) {
+		var D = this.d_euclid(a,b);
+		var delta = Math.sqrt((D + a.r + b.r)*(-D + a.r + b.r)
+				*(D + -a.r + b.r)*(D + a.r + -b.r))/4.0;
+		var x1 = (a.x+b.x)/2 + (b.x-a.x)*(a.r*a.r - b.r*b.r)/(2*D*D)
+			+ 2*(a.y-b.y)*delta/D/D;
+		var x2 = (a.x+b.x)/2 + (b.x-a.x)*(a.r*a.r - b.r*b.r)/(2*D*D)
+			- 2*(a.y-b.y)*delta/D/D;
+		var y1 = (a.y+b.y)/2 + (b.y-a.y)*(a.r*a.r - b.r*b.r)/(2*D*D)
+			- 2*(a.x-b.x)*delta/D/D;
+		var y2 = (a.y+b.y)/2 + (b.y-a.y)*(a.r*a.r - b.r*b.r)/(2*D*D)
+			+ 2*(a.x-b.x)*delta/D/D;
+		//console.log("("+x1+","+y1+"),"+"("+x2+","+y2+")");
+		return [{"type":"point", "x":x1, "y":y1},
+			{"type":"point", "x":x2, "y":y2}]
+	}
+
+	this.pointFrom2Circles = function(a,b) {
+		var points = this.pointsFrom2Circles(a,b);
+		if (points.length == 0) { throw("These circles do not intersect."); }
+		return points[0];
 	}
 }
 
@@ -213,6 +245,19 @@ function geomTests() {
 		var line = {"type":"line", "x1":1, "y1": 1, "x2":3, "y2":2};
 		var p1 = {"type":"point", "x":7, "y": 4};
 		return pc.revLineParam(line, p1) == 3;
+	});
+	this.tests.push(function() {
+		var pc = new ProjectiveCalc();
+		var p1 = {"type":"point", "x":7, "y": 4};
+		var p2 = {"type":"point", "x":4, "y": 8};
+		return pc.d_euclid(p1,p2) == 5;
+	});
+	this.tests.push(function() {
+		var pc = new ProjectiveCalc();
+		var c1 = {"type":"circle", "x":0, "y": 0, "r":1};
+		var c2 = {"type":"circle", "x":1, "y": 1, "r":1};
+		var p1 = pc.pointFrom2Circles(c1,c2);
+		return Math.abs(p1.x-0) < 0.01 && Math.abs(p1.y-1) < 0.01;
 	});
 }
 

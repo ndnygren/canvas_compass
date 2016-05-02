@@ -20,11 +20,14 @@ function CanvasWriter(canvas) {
 	}
 
 	this.drawPointList = function(list) {
-		for (var i in list.point) {
-			this.drawPoint(list.point[i].x, list.point[i].y);
-		}
 		for (var i in list.line) {
 			this.drawLine(list.line[i]);
+		}
+		for (var i in list.circle) {
+			this.drawArc(list.circle[i]);
+		}
+		for (var i in list.point) {
+			this.drawPoint(list.point[i].x, list.point[i].y);
 		}
 	}
 
@@ -52,6 +55,14 @@ function CanvasWriter(canvas) {
 				"rgba(0,255,0,127)", 1);
 	}
 
+	this.drawArc = function(circle) {
+		this.drawCircle_uns(this.scaleX(circle.x),
+				this.scaleY(circle.y),
+				Math.abs(this.scaleX(circle.x)-this.scaleX(circle.x+circle.r)),
+				"none",
+				"rgba(0,0,200,128)");
+	}
+
 	// finds an appropriate scale for the diagram,
 	// depending on the size of the input
 	this.setSizeBasedOnDataSet = function(list) {
@@ -74,14 +85,19 @@ function CanvasWriter(canvas) {
 
 	// direct canvas interaction, creates a circle
 	this.drawCircle = function(x,y,r,color) {
+		this.drawCircle_uns(x,y,r,color,'#000000');
+	}
+
+	// direct canvas interaction, creates a circle
+	this.drawCircle_uns = function(x,y,r,fill_color, line_color) {
 		var context = this.canvas.getContext('2d');
 
 		context.beginPath();
 		context.arc(x, y, r, 0, 2 * Math.PI, false);
-		context.fillStyle = color;
-		context.fill();
+		context.fillStyle = fill_color;
+		if (fill_color != "none" ) { context.fill(); }
 		context.lineWidth = 1;
-		context.strokeStyle = '#000000';
+		context.strokeStyle = line_color;
 		context.stroke();
 	}
 
@@ -102,6 +118,8 @@ function CanvasWriter(canvas) {
 		this.scaleh = this.width/(this.data_x_high - this.data_x_low);
 		this.scalev = (this.height + 2 * this.border - 2*this.border)
 			/(this.data_y_high - this.data_y_low);
+		this.scaleh = Math.min(this.scaleh, this.scalev);
+		this.scalev = this.scaleh;
 	}
 
 	// stretches and translates a single point horizontally

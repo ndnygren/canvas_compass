@@ -283,6 +283,19 @@ function ProjectiveCalc() {
 				&& child[1].type == "line") {
 				return this.pointFrom2Lines(child[0],child[1]);
 			}
+			else if (child.length == 2
+				&& child[0].type == "circle"
+				&& child[1].type == "circle") {
+				return this.pointFrom2Circles(child[0],child[1]);
+			}
+		}
+		else if (root == "circle") {
+			if (child.length == 2
+				&& child[0].type == "point"
+				&& child[1].type == "point") {
+				return this.circleFrom2Points(child[0],child[1]);
+			}
+
 		}
 		throw("Unhandled layer, " + root + ", with " + JSON.stringify(child));
 	}

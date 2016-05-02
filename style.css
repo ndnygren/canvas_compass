@@ -20,16 +20,15 @@ div {
 
 
 #main_content_div{
-	display:table;
 }
 
 .outer_div {
-	display:table;
 }
 
 .inner_div {
-	display:table-cell;
+	display: inline-block;
 	border:none;
+	vertical-align: text-top;
 }
 
 #graph_div {

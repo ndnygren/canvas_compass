@@ -321,7 +321,10 @@ function geomTests() {
 	}
 
 	this.runTests = function() {
-		return this.tests.map(function(x) { return x();});
+		var results = this.tests.map(function(x) { return x();});
+		var numeric = results.map(function(x) { return x ? 1 : 0;});
+		return assocFoldr(numeric, function(a,b) {return a+b; })
+			+ " tests out of " + numeric.length + " passed.";
 	}
 
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });

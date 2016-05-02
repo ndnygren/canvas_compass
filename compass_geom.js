@@ -68,6 +68,20 @@ function CTNode(input) {
 		else if (this.child.length != 2) { return false; }
 		return this.child[0].pointValid() && this.child[1].pointValid();
 	}
+
+	this.collect = function(cache) {
+		var pc = new ProjectiveCalc();
+		var newnode;
+		if (this.name == "point"
+			&& this.child.length == 2
+			&& !isNaN(this.child[0].name)
+			&& !isNaN(this.child[1].name)) {
+				newnode = pc.pointNumeric(this.child[0].name, this.child[1].name);
+				cache.points.push(newnode);
+				return newnode;
+		}
+		return this.child.map(function(x) { return x.collect(cache); });
+	}
 }
 
 function ConstructParse() {
@@ -317,6 +331,17 @@ function geomTests() {
 
 		return Math.abs(p1.x-2) < 0.01 && Math.abs(p1.y-2) < 0.01;
 	});
-}
 
+	this.tests.push(function() {
+		var str = "point( line(point(1,0), point(0,1)), line(point(2,0), point(2,1)))";
+		var cp = new ConstructParse();
+		var tree = cp.read(str);
+		var cache = {"points":[]};
+		tree.collect(cache);
+		console.log(JSON.stringify(cache));
+
+		return false;
+	});
+
+}
 

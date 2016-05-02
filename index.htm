@@ -12,13 +12,25 @@
 		<h2>Enter Construction:</h2>
 		<div id="main_content_div" class="outer_div">
 			<div class="inner_div">
-				<textarea id="input_box"> line(point(1,0), point(0,1)) </textarea>
+				<textarea id="input_box">
+					point(
+					line(point(1,0), point(0,1)),
+					line(point(2,0), point(2,1)))
+				</textarea>
 			</div>
 			<div class="inner_div">
 				<button onclick="loadInput();">Load</button>
 			</div>
 		</div>
-		<div id="output_div" class="outer_div"></div>
+		<div class="outer_div">
+			<div style="display:table-row">
+				<div id="canvas_div" class="inner_div">
+					<canvas id="drawing_window" width=500 height=200>
+					</canvas>
+				</div>
+				<div id="output_div" class="inner_div"></div>
+			</div>
+		</div>
 		<div id="test_div" class="outer_div"></div>
 	</body>
 	<script type="text/javascript">

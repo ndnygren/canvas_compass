@@ -288,6 +288,16 @@ function ProjectiveCalc() {
 				&& child[1].type == "circle") {
 				return this.pointFrom2Circles(child[0],child[1]);
 			}
+			else if (child.length == 2
+				&& child[0].type == "line"
+				&& child[1].type == "circle") {
+				return this.pointFromLineCircle(child[0],child[1]);
+			}
+			else if (child.length == 2
+				&& child[0].type == "circle"
+				&& child[1].type == "line") {
+				return this.pointFromLineCircle(child[1],child[0]);
+			}
 		}
 		else if (root == "circle") {
 			if (child.length == 2

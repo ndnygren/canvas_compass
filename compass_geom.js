@@ -77,10 +77,12 @@ function CTNode(input) {
 			&& !isNaN(this.child[0].name)
 			&& !isNaN(this.child[1].name)) {
 				newnode = pc.pointNumeric(this.child[0].name, this.child[1].name);
-				cache.points.push(newnode);
+				cache.point.push(newnode);
 				return newnode;
 		}
-		return pc.calcLayer(this.name, this.child.map(function(x) { return x.collect(cache); }));
+		newnode = pc.calcLayer(this.name, this.child.map(function(x) { return x.collect(cache); }));
+		cache[newnode["type"]].push(newnode);
+		return newnode;
 	}
 }
 
@@ -94,11 +96,19 @@ function ConstructParse() {
 		return -1;
 	}
 
+	this.wsClean = function(input) {
+		var output = "";
+		for (var i = 0; i < input.length; i++) {
+			output += input[i] == "\n" ? " " : input[i];
+		}
+		return output;
+	}
+
 	this.read = function(input) {
 		var tree = new CTNode("top");
 		var stack = [tree];
 		var tokens = [",", "(", ")"];
-		var str = input;
+		var str = this.wsClean(input);
 		var cur = 0, next = this.nextToken(str, cur, tokens);
 		var newtoken = "";
 		for (cur = 0; cur < str.length && cur >= 0; next = this.nextToken(str, cur, tokens)) {
@@ -352,7 +362,7 @@ function geomTests() {
 		var str = "point( line(point(1,0), point(0,1)), line(point(2,0), point(2,1)))";
 		var cp = new ConstructParse();
 		var tree = cp.read(str).child[0];
-		var cache = {"points":[]};
+		var cache = {"point":[], "line":[], "circle":[]};
 		var collection = tree.collect(cache);
 		//console.log(JSON.stringify(collection) + "\n" + JSON.stringify(cache));
 

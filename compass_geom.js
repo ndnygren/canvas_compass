@@ -80,7 +80,7 @@ function CTNode(input) {
 				cache.points.push(newnode);
 				return newnode;
 		}
-		return this.child.map(function(x) { return x.collect(cache); });
+		return pc.calcLayer(this.name, this.child.map(function(x) { return x.collect(cache); }));
 	}
 }
 
@@ -260,6 +260,22 @@ function ProjectiveCalc() {
 			return points[1];
 		}
 	}
+
+	this.calcLayer = function(root, child) {
+		if (root == "line") {
+			if (child.length == 2 && child[0].type == "point") {
+				return this.lineFrom2Points(child[0],child[1]);
+			}
+		}
+		else if (root == "point") {
+			if (child.length == 2
+				&& child[0].type == "line"
+				&& child[1].type == "line") {
+				return this.pointFrom2Lines(child[0],child[1]);
+			}
+		}
+		throw("Unhandled layer, " + root + ", with " + JSON.stringify(child));
+	}
 }
 
 function geomTests() {
@@ -335,12 +351,12 @@ function geomTests() {
 	this.tests.push(function() {
 		var str = "point( line(point(1,0), point(0,1)), line(point(2,0), point(2,1)))";
 		var cp = new ConstructParse();
-		var tree = cp.read(str);
+		var tree = cp.read(str).child[0];
 		var cache = {"points":[]};
-		tree.collect(cache);
-		console.log(JSON.stringify(cache));
+		var collection = tree.collect(cache);
+		//console.log(JSON.stringify(collection) + "\n" + JSON.stringify(cache));
 
-		return false;
+		return collection.x==2 && collection.y==-1;
 	});
 
 }

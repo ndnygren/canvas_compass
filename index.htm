@@ -14,7 +14,9 @@
 		<div id="main_content_div" class="outer_div">
 			<div class="inner_div">
 				<textarea id="input_box">
-					line(
+					c1 = circle(point(-1,1), point(1,-1));
+					c2 = circle(point(1,-1), point(-1,1));
+					l1=line(
 					point(
 					circle(point(-1,1), point(1,-1)),
 					circle(point(1,-1), point(-1,1))
@@ -23,7 +25,7 @@
 					circle(point(1,-1), point(-1,1)),
 					circle(point(-1,1), point(1,-1))
 					)
-					)
+					);
 				</textarea>
 			</div>
 			<div class="inner_div">
@@ -32,7 +34,7 @@
 		</div>
 		<div class="outer_div">
 				<div id="canvas_div" class="inner_div">
-					<canvas id="drawing_window" width=500 height=200>
+					<canvas id="drawing_window" width=500 height=500>
 					</canvas>
 				</div>
 				<div id="output_div" class="inner_div"></div>
@@ -46,10 +48,20 @@
 			var pc = new ProjectiveCalc();
 			var cw = new CanvasWriter(document.getElementById("drawing_window"));
 			var input_text = document.getElementById("input_box").value;
-			var tree = cp.read(input_text);
+			var tree = cp.assignRead(input_text)[0].tree;
 			var cache = {"point":[], "line":[], "circle":[]};
-			tree.child[0].collect(cache);
-			document.getElementById("output_div").innerHTML = cp.htmlDebug(tree);
+			cp.assignRead(input_text).map(function(x){
+				return x.tree;
+			}).map(function(x) {
+				return x.child[0].collect(cache);
+			});
+			//tree.child[0].collect(cache);
+			document.getElementById("output_div").innerHTML = 
+				assocFoldr(cp.assignRead(input_text).map(function (x){
+					return cp.htmlDebug(x.tree);
+				}), function(a,b) {
+					return a+b;
+				});
 			document.getElementById("test_div").innerHTML = gt.runTests();
 			cw.setSizeBasedOnDataSet(cache.point);
 			cw.drawPointList(cache);

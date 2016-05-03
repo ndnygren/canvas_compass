@@ -104,6 +104,33 @@ function ConstructParse() {
 		return output;
 	}
 
+	this.breakOnDelim = function(input, delim) {
+		var output = [];
+		var last = 0;
+		for (var i = 0; i < input.length; i++) {
+			if (input[i] == delim) {
+				output.push(input.substring(last, i));
+				last = i+1;
+			}
+		}
+		output.push(input.substring(last, i));
+		return output;
+	}
+
+	this.assignRead = function(input) {
+		var cp  = this;
+		var lines = cp.breakOnDelim(this.wsClean(input), ";");
+		var output = lines.filter(function(x){
+			return x.replace(/[ \t]+$/,"") != "";
+		}).map(function(x){
+			var lr = cp.breakOnDelim(x, "=");
+			if (lr.length != 2) { throw("invalid assignment: " + x); }
+			return {"name": lr[0], "tree": cp.read(lr[1]) };
+		});
+
+		return output;
+	}
+
 	this.read = function(input) {
 		var tree = new CTNode("top");
 		var stack = [tree];
@@ -394,6 +421,35 @@ function geomTests() {
 
 		return collection.x==2 && collection.y==-1;
 	});
-
+	this.tests.push(function() {
+		var str = "a;aasd;sfdd";
+		var cp = new ConstructParse();
+		var arr = cp.breakOnDelim(str, ";");
+		return arr[1]=="aasd" && arr.length==3;
+	});
+	this.tests.push(function() {
+		var str = "a;aasd;";
+		var cp = new ConstructParse();
+		var arr = cp.breakOnDelim(str, ";");
+		return arr[2]=="" && arr.length==3;
+	});
+	this.tests.push(function() {
+		var str = ";aasd;qrs";
+		var cp = new ConstructParse();
+		var arr = cp.breakOnDelim(str, ";");
+		return arr[0]=="" && arr.length==3;
+	});
+	this.tests.push(function() {
+		var str = "a;;qrs";
+		var cp = new ConstructParse();
+		var arr = cp.breakOnDelim(str, ";");
+		return arr[1]=="" && arr.length==3;
+	});
+	this.tests.push(function() {
+		var str = "a=a;qrs=65;";
+		var cp = new ConstructParse();
+		var arr = cp.assignRead(str);
+		return arr.length == 2 && arr[0].name=="a";
+	});
 }
 

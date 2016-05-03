@@ -69,7 +69,7 @@ function CTNode(input) {
 		return this.child[0].pointValid() && this.child[1].pointValid();
 	}
 
-	this.collect = function(cache) {
+	this.collect = function(cache, assignments) {
 		var pc = new ProjectiveCalc();
 		var newnode;
 		if (this.name == "point"
@@ -80,7 +80,7 @@ function CTNode(input) {
 				cache.point.push(newnode);
 				return newnode;
 		}
-		newnode = pc.calcLayer(this.name, this.child.map(function(x) { return x.collect(cache); }));
+		newnode = pc.calcLayer(this.name, this.child.map(function(x) { return x.collect(cache,assignments); }), assignments);
 		cache[newnode["type"]].push(newnode);
 		return newnode;
 	}
@@ -94,6 +94,10 @@ function ConstructParse() {
 			}
 		}
 		return -1;
+	}
+
+	this.trim = function(input){
+		return input.replace(/[ \t]+$/, "").replace(/^[ \t]+/, "");
 	}
 
 	this.wsClean = function(input) {
@@ -125,7 +129,9 @@ function ConstructParse() {
 		}).map(function(x){
 			var lr = cp.breakOnDelim(x, "=");
 			if (lr.length != 2) { throw("invalid assignment: " + x); }
-			return {"name": lr[0], "tree": cp.read(lr[1]) };
+			var tree = cp.read(lr[1]);
+			tree.name = cp.trim(lr[0]);
+			return {"name": tree.name, "tree": tree };
 		});
 
 		return output;
@@ -298,7 +304,7 @@ function ProjectiveCalc() {
 		}
 	}
 
-	this.calcLayer = function(root, child) {
+	this.calcLayer = function(root, child, assignments) {
 		if (root == "line") {
 			if (child.length == 2 && child[0].type == "point") {
 				return this.lineFrom2Points(child[0],child[1]);
@@ -333,7 +339,10 @@ function ProjectiveCalc() {
 				return this.circleFrom2Points(child[0],child[1]);
 			}
 
+		} else if (child.length == 0 && root in assignments) {
+			return assignments[root];
 		}
+		console.log(JSON.stringify(assignments));
 		throw("Unhandled layer, " + root + ", with " + JSON.stringify(child));
 	}
 }

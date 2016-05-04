@@ -432,6 +432,53 @@ function MtxCalc() {
 		}
 		return output;
 	}
+
+	this.vectCopy = function(x) {
+		return x.map(function(x) { return x; });
+	}
+
+	this.mtxCopy = function(x) {
+		var mc = this;
+		return x.map(function(x) { return mc.vectCopy(x); });
+	}
+
+	this.makeZero = function(dim) {
+		var output = [];
+		for (var i = 0; i < dim ; i++) {
+			output.push([]);
+			for (var j = 0; j < dim; j++) {
+				output[i].push(0);
+			}
+		}
+		return output;
+	}
+
+	this.makeId = function(dim) {
+		var output = this.makeZero(dim);
+		for (var i = 0; i < dim; i++) {
+			output[i][i] = 1;
+		}
+		return output;
+	}
+
+	this.reduce = function(mtx) {
+		var output = this.mtxCopy(mtx);
+		var temp;
+		for (var row = 0; row < mtx.length; row++) {
+			if (output[row][row] != 0){
+				output[row] = this.scaleVect(1/output[row][row], output[row]);
+			}
+			for (var k = 0; k < mtx.length; k++) {
+				if (k != row && output[k][row] != 0) {
+					temp = this.scaleVect(-output[k][row], output[row]);
+					output[k] = this.vectAdd(temp, output[k]);
+				}
+
+			}
+		}
+
+		return output;
+	}
 }
 
 function geomTests() {
@@ -601,6 +648,29 @@ function geomTests() {
 		return mc.mtxEqual(mc.mtxMult([[1,2],[2,1]],[[1,2],[2,3]]),
 			[[5,8],[4,7]]);
 	});
-
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.mtxEqual(mc.mtxCopy([[1,2],[3,4]]), [[1,2],[3,4]]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.mtxEqual([[1,0,0],[0,1,0],[0,0,1]], mc.makeId(3));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.mtxEqual(mc.reduce([[1,0,0],[0,1,0],[0,0,1]]), mc.makeId(3));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var comp = mc.makeId(3);
+		comp[0][2] = -1;
+		comp[1][2] = 2;
+		comp[2][2] = 0;
+		return mc.mtxEqual(mc.reduce([[1,2,3],[4,5,6],[7,8,9]]), comp);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.mtxEqual(mc.reduce([[1,2,3],[4,5,6],[7,8,10]]), mc.makeId(3));
+	});
 }
 

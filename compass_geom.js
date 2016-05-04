@@ -392,6 +392,46 @@ function MtxCalc() {
 			return mc.vectAdd(a, b);
 		});
 	}
+
+	this.scaleVect = function(s, vect) {
+		return vect.map(function(x) { return s*x; });
+	}
+
+	this.scaleMtx = function(s, mtx) {
+		var mc = this;
+		return mtx.map(function(x) {return mc.scaleVect(s,x);});
+	}
+
+	this.mtxVectMult = function(mtx, vect) {
+		var mc = this;
+		return mtx.map(function(row) { return mc.vectMult(row,vect); });
+	}
+
+	this.selectCol = function(col,mtx) {
+		return mtx.map(function(row) {
+			return row[col];
+		});
+	}
+
+	this.cols = function(mtx) {
+		if (mtx.length == 0) { return 0;}
+		return mtx[0].length;
+	}
+
+	this.mtxMult = function(m1, m2) {
+		if (this.cols(m1) != m2.length) { throw("attempting to multiply a " + m1.length + "by" + this.cols(m1) + " with a " + m2.length + "by" + this.cols(m2)); }
+		var output = [];
+		for (var row = 0; row < m1.length; row++) {
+			output.push([]);
+			for (var col = 0; col < this.cols(m2); col++){
+				output[row].push(0);
+				for (var k = 0; k < m2.length; k++) {
+					output[row][col] += m1[row][k]*m2[k][col];
+				}
+			}
+		}
+		return output;
+	}
 }
 
 function geomTests() {
@@ -539,6 +579,27 @@ function geomTests() {
 	this.tests.push(function() {
 		var mc = new MtxCalc();
 		return mc.mtxEqual(mc.mtxAdd([[3,1,1],[-2,0,2]], [[3,2,1],[-2,0,2]]), [[6,3,2],[-4,0,4]]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.mtxEqual(mc.scaleMtx(2,[[3,1,1],[-2,0,2]]), [[6,2,2],[-4,0,4]]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.vectEqual(mc.mtxVectMult([[1,0],[0,1]],[2,3]), [2,3]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.vectEqual(mc.mtxVectMult([[3,4],[5,6]],[2,3]), [18,28]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.vectEqual(mc.selectCol(1,[[3,4],[5,6],[2,3]]), [4,6,3]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.mtxEqual(mc.mtxMult([[1,2],[2,1]],[[1,2],[2,3]]),
+			[[5,8],[4,7]]);
 	});
 
 }

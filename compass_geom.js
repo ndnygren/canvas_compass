@@ -356,7 +356,6 @@ function MtxCalc() {
 		}), function(a,b) {
 			return a && b;
 		});
-		return true;
 	}
 
 	this.vectMult = function(a,b) {
@@ -372,6 +371,25 @@ function MtxCalc() {
 		if (a.length != b.length) { throw("Vector size mismatch."); }
 		return zippr(a,b, function(a,b) {
 			return a + b;
+		});
+	}
+
+	this.mtxEqual = function(a,b) {
+		var mc = this;
+		if (a.length != b.length) { return false; }
+		if (a.length == 0) { return true; }
+		return assocFoldr(zippr(a,b, function(a,b) {
+			return mc.vectEqual(a,b);
+		}), function(a,b) {
+			return a && b;
+		});
+	}
+
+	this.mtxAdd = function (a,b) {
+		var mc = this;
+		if (a.length != b.length) { throw("Vector size mismatch."); }
+		return zippr(a,b, function(a,b) {
+			return mc.vectAdd(a, b);
 		});
 	}
 }
@@ -509,6 +527,18 @@ function geomTests() {
 	this.tests.push(function() {
 		var mc = new MtxCalc();
 		return mc.vectEqual(mc.vectAdd([3,2,1],[-2,0,2]), [1,2,3]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.mtxEqual([[3,2,1],[-2,0,2]], [[3,2,1],[-2,0,2]]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return !mc.mtxEqual([[3,1,1],[-2,0,2]], [[3,2,1],[-2,0,2]]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.mtxEqual(mc.mtxAdd([[3,1,1],[-2,0,2]], [[3,2,1],[-2,0,2]]), [[6,3,2],[-4,0,4]]);
 	});
 
 }

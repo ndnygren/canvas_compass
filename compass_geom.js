@@ -347,6 +347,35 @@ function ProjectiveCalc() {
 	}
 }
 
+function MtxCalc() {
+	this.vectEqual = function(a,b) {
+		if (a.length != b.length) { return false; }
+		if (a.length == 0) { return true; }
+		return assocFoldr(zippr(a,b, function(a,b) {
+			return a==b;
+		}), function(a,b) {
+			return a && b;
+		});
+		return true;
+	}
+
+	this.vectMult = function(a,b) {
+		if (a.length != b.length) { throw("Vector size mismatch."); }
+		return assocFoldr(zippr(a,b, function(a,b) {
+			return a * b;
+		}), function(a,b) {
+			return a + b;
+		});
+	}
+
+	this.vectAdd = function(a,b) {
+		if (a.length != b.length) { throw("Vector size mismatch."); }
+		return zippr(a,b, function(a,b) {
+			return a + b;
+		});
+	}
+}
+
 function geomTests() {
 	var gt = this;
 	this.tests = [];
@@ -460,5 +489,27 @@ function geomTests() {
 		var arr = cp.assignRead(str);
 		return arr.length == 2 && arr[0].name=="a";
 	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var out = mc.vectMult([1,2,3],[3,2,1]);
+		return out == 10;
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.vectEqual([1,2,3],[1,2,3]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return !mc.vectEqual([3,2,1],[1,2,3]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return !mc.vectEqual([1,2],[1,2,3]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.vectEqual(mc.vectAdd([3,2,1],[-2,0,2]), [1,2,3]);
+	});
+
 }
 

@@ -352,7 +352,7 @@ function MtxCalc() {
 		if (a.length != b.length) { return false; }
 		if (a.length == 0) { return true; }
 		return assocFoldr(zippr(a,b, function(a,b) {
-			return a==b;
+			return Math.abs(a-b) < 0.000001;
 		}), function(a,b) {
 			return a && b;
 		});
@@ -461,10 +461,25 @@ function MtxCalc() {
 		return output;
 	}
 
+	this.swapHighestMagOnRow = function(row, mtx) {
+		var max = Math.abs(mtx[row][row]), maxidx = row;
+		var temp;
+		for (var k = row+1; k < mtx.length; k++) {
+			if (Math.abs(mtx[k][row]) > max){
+				max = Math.abs(mtx[k][row]);
+				maxidx = k;
+			}
+		}
+		temp = mtx[row];
+		mtx[row] = mtx[maxidx]
+		mtx[maxidx] = temp;
+	}
+
 	this.reduce = function(mtx) {
 		var output = this.mtxCopy(mtx);
 		var temp;
 		for (var row = 0; row < mtx.length; row++) {
+			this.swapHighestMagOnRow(row,output);
 			if (output[row][row] != 0){
 				output[row] = this.scaleVect(1/output[row][row], output[row]);
 			}
@@ -476,7 +491,6 @@ function MtxCalc() {
 
 			}
 		}
-
 		return output;
 	}
 }
@@ -493,6 +507,13 @@ function geomTests() {
 	this.runTests = function() {
 		var results = this.tests.map(function(x) { return x();});
 		var numeric = results.map(function(x) { return x ? 1 : 0;});
+		var log_entry = "";
+		for(var i = 0; i < results.length; i++) {
+			if (!results[i]) {
+				log_entry += "test " + i + " failed.\n";
+			}
+		}
+		console.log(log_entry);
 		return assocFoldr(numeric, function(a,b) {return a+b; })
 			+ " tests out of " + numeric.length + " passed.";
 	}
@@ -671,6 +692,22 @@ function geomTests() {
 	this.tests.push(function() {
 		var mc = new MtxCalc();
 		return mc.mtxEqual(mc.reduce([[1,2,3],[4,5,6],[7,8,10]]), mc.makeId(3));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.mtxEqual(mc.reduce([[1,2,3],[4,8,6],[7,8,9]]), mc.makeId(3));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var input =
+			[[1,1/2,1/3,1,0,0],
+			[1/2,1/3,1/4,0,1,0],
+			[1/3,1/4,1/5,0,0,1]];
+		var output =
+			[[1,0,0,9,-36,30],
+			[0,1,0,-36,192,-180],
+			[0,0,1,30,-180,180]];
+		return mc.mtxEqual(mc.reduce(input), output);
 	});
 }
 

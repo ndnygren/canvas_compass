@@ -56,7 +56,9 @@
 			document.getElementById("test_div").innerHTML = gt.runTests();
 			cw.setSizeBasedOnDataSet(cache.point);
 			cw.drawPointList(cache);
+			localStorage.setItem("last_construction",input_text);
 			return false;
 		}
+		document.getElementById("input_box").value = localStorage.getItem("last_construction");
 	</script>
 </html>

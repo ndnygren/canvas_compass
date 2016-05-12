@@ -493,6 +493,20 @@ function MtxCalc() {
 		}
 		return output;
 	}
+
+	this.sideBySide = function(a,b) {
+		return zippr(a,b, function(x,y) { return x.concat(y); } )
+	}
+
+	this.leftSplit = function(mtx, size) {
+		if (size >= mtx[0].length) { throw ("size("+size+") must be smaller than number of columns.\n" + JSON.stringify(mtx)); }
+		return mtx.map(function(x) { return x.slice(0,size); })
+	}
+
+	this.rightSplit = function(mtx, size) {
+		if (size > mtx[0].length) { throw ("size("+size+") must be smaller than number of columns.\n" + JSON.stringify(mtx)); }
+		return mtx.map(function(x) { return x.slice(x.length-size,x.length); })
+	}
 }
 
 function geomTests() {
@@ -708,6 +722,24 @@ function geomTests() {
 			[0,1,0,-36,192,-180],
 			[0,0,1,30,-180,180]];
 		return mc.mtxEqual(mc.reduce(input), output);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var input = [[1,2],[3,4]];
+		var output = [[1,2,1,0],[3,4,0,1]];
+		return mc.mtxEqual(mc.sideBySide(input, mc.makeId(2)),output);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var input = [[1,2],[3,4]];
+		var output = [[1,2,1,0],[3,4,0,1]];
+		return mc.mtxEqual(mc.leftSplit(output, 2),input);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var input = [[1,2],[3,4]];
+		var output = [[1,2,1,0],[3,4,0,1]];
+		return mc.mtxEqual(mc.rightSplit(output, 2), mc.makeId(2));
 	});
 }
 

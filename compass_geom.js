@@ -499,13 +499,32 @@ function MtxCalc() {
 	}
 
 	this.leftSplit = function(mtx, size) {
-		if (size >= mtx[0].length) { throw ("size("+size+") must be smaller than number of columns.\n" + JSON.stringify(mtx)); }
+		if (size > this.cols(mtx)) { throw ("size("+size+") must be smaller than number of columns.\n" + JSON.stringify(mtx)); }
 		return mtx.map(function(x) { return x.slice(0,size); })
 	}
 
 	this.rightSplit = function(mtx, size) {
-		if (size > mtx[0].length) { throw ("size("+size+") must be smaller than number of columns.\n" + JSON.stringify(mtx)); }
+		if (size > this.cols(mtx)) { throw ("size("+size+") must be smaller than number of columns.\n" + JSON.stringify(mtx)); }
 		return mtx.map(function(x) { return x.slice(x.length-size,x.length); })
+	}
+
+	this.inverse = function(mtx) {
+		if (mtx.length != this.cols(mtx)) {throw ("only square matrices have inverses");}
+		var start = this.sideBySide(mtx, this.makeId(mtx.length));
+		return this.rightSplit(this.reduce(start), mtx.length);
+	}
+
+	this.transpose = function(mtx) {
+		var output = [];
+
+		for (var i = 0; i < this.cols(mtx); i++) {
+			output.push([]);
+			for (var j = 0; j < mtx.length; j++) {
+				output[i].push(mtx[j][i]);
+			}
+		}
+
+		return output;
 	}
 }
 
@@ -740,6 +759,30 @@ function geomTests() {
 		var input = [[1,2],[3,4]];
 		var output = [[1,2,1,0],[3,4,0,1]];
 		return mc.mtxEqual(mc.rightSplit(output, 2), mc.makeId(2));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var input = [[1,1/2,1/3], [1/2,1/3,1/4], [1/3,1/4,1/5]];
+		var output = [[9,-36,30], [-36,192,-180], [30,-180,180]];
+		return mc.mtxEqual(mc.mtxMult(input,output),mc.makeId(3));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var input = [[1,1/2,1/3], [1/2,1/3,1/4], [1/3,1/4,1/5]];
+		var output = [[9,-36,30], [-36,192,-180], [30,-180,180]];
+		return mc.mtxEqual(input,mc.inverse(output));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var input = [[1,1/2,1/3], [1/2,1/3,1/4], [1/3,1/4,1/5]];
+		var output = [[9,-36,30], [-36,192,-180], [30,-180,180]];
+		return mc.mtxEqual(mc.mtxMult(output,mc.inverse(output)), mc.makeId(3));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var mtx1 = [[1,2,3],[4,5,6],[7,8,9]];
+		var mtx2 = [[1,4,7],[2,5,8],[3,6,9]];
+		return mc.mtxEqual(mc.transpose(mtx1),mtx2);
 	});
 }
 

@@ -533,8 +533,44 @@ function PolyCalc() {
 		return [{"n":[x], "d":[1]}];
 	}
 
+	this.isConst = function(input) {
+		return (input.n.length == 1 && input.d.length == 1
+			&& !isNaN(input.n[0]) && !isNaN(input.d[0]));
+	}
+
+	this.addSingle = function(lhs,rhs) {
+		var output = this.num(1)[0];
+		if (this.isConst(lhs) && this.isConst(rhs)) {
+			output.n = [lhs.n[0]*rhs.d[0] + rhs.n[0]*lhs.d[0]];
+			output.d = [lhs.d[0]*rhs.d[0]];
+			return output;
+		}
+		throw("cannot add non-const terms:"
+			+JSON.stringify(lhs)
+			+ ","
+			+ JSON.stringify(rhs));
+	}
+
 	this.add = function(lhs, rhs) {
-		return lhs.concat(rhs);
+		var output = [];
+		var accum = this.num(0)[0];
+		var temp = lhs.concat(rhs);
+		for (var i in temp) {
+			if (this.isConst(temp[i])) { accum = this.addSingle(accum, temp[i]);}
+			else { output.push(temp[i]); }
+		}
+		output.push(accum);
+		return output;
+	}
+
+	this.eval = function(input,arg) {
+		var terms = input.map(function (x) {
+			var num = x.n.map(function (y) { return isNaN(y) ? arg : y; });
+			var denom = x.d.map(function (y) { return isNaN(y) ? arg : y; });
+			return assocFoldr(num, function(a,b) {return a*b;}) / assocFoldr(denom, function(a,b) {return a*b;});
+
+		});
+		return assocFoldr(terms, function(a,b) {return a+b; });
 	}
 
 	this.reduceArr = function(input) {
@@ -550,7 +586,7 @@ function PolyCalc() {
 
 	this.multSingle = function(lhs,rhs) {
 		if (!lhs.n || !rhs.n || !lhs.d || !rhs.d) {throw ("bad argument."); }
-		return {"n": lhs.n.concat(rhs.n), "d": lhs.d.concat(rhs.d)};
+		return {"n": this.reduceArr(lhs.n.concat(rhs.n)), "d": this.reduceArr(lhs.d.concat(rhs.d))};
 	}
 
 	this.mult = function(lhs, rhs) {
@@ -582,7 +618,7 @@ function geomTests() {
 				log_entry += "test " + i + " failed.\n";
 			}
 		}
-		console.log(log_entry);
+		if(log_entry != "") { console.log(log_entry); }
 		return assocFoldr(numeric, function(a,b) {return a+b; })
 			+ " tests out of " + numeric.length + " passed.";
 	}
@@ -594,9 +630,32 @@ function geomTests() {
 	});
 	this.tests.push(function() {
 		var pc = new PolyCalc();
+		var temp = [1,2,"x",3,5];
+		return pc.reduceArr(temp)[1] == 30 && pc.reduceArr(temp)[0] == "x";
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		return pc.isConst(pc.num(6)[0]);
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		return !pc.isConst(pc.num("x")[0]);
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var num1 = pc.num(1), num2 = pc.num(2);
+		return pc.eval(pc.add(num1, num2), 0) == (1+2);
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var num3 = pc.num(3), num4 = pc.num(4);
+		return pc.eval(pc.add(num3, num4), 0) == (3+4);
+	});
+
+	this.tests.push(function() {
+		var pc = new PolyCalc();
 		var num1 = pc.num(1), num2 = pc.num(2), num3 = pc.num(3), num4 = pc.num(4);
-		console.log(JSON.stringify(pc.mult(pc.add(num1, num2), pc.add(num3, num4))));
-		return false;
+		return pc.eval(pc.mult(pc.add(num1, num2), pc.add(num3, num4)), 0) == (1+2)*(3+4);
 	});
 
 	// start geometry tests

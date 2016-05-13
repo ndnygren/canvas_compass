@@ -537,6 +537,17 @@ function PolyCalc() {
 		return lhs.concat(rhs);
 	}
 
+	this.reduceArr = function(input) {
+		var output = [];
+		var accum = 1;
+		for (var i in input) {
+			if (isNaN(input[i])) { output.push(input[i]); }
+			else { accum *= input[i]; }
+		}
+		output.push(accum);
+		return output;
+	}
+
 	this.multSingle = function(lhs,rhs) {
 		if (!lhs.n || !rhs.n || !lhs.d || !rhs.d) {throw ("bad argument."); }
 		return {"n": lhs.n.concat(rhs.n), "d": lhs.d.concat(rhs.d)};
@@ -576,6 +587,11 @@ function geomTests() {
 			+ " tests out of " + numeric.length + " passed.";
 	}
 	// start polynomial tests
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var temp = [1,2,3,5];
+		return pc.reduceArr(temp)[0] == 30;
+	});
 	this.tests.push(function() {
 		var pc = new PolyCalc();
 		var num1 = pc.num(1), num2 = pc.num(2), num3 = pc.num(3), num4 = pc.num(4);

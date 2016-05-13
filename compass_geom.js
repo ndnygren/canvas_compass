@@ -528,6 +528,31 @@ function MtxCalc() {
 	}
 }
 
+function PolyCalc() {
+	this.num = function(x) {
+		return [{"n":[x], "d":[1]}];
+	}
+
+	this.add = function(lhs, rhs) {
+		return lhs.concat(rhs);
+	}
+
+	this.multSingle = function(lhs,rhs) {
+		if (!lhs.n || !rhs.n || !lhs.d || !rhs.d) {throw ("bad argument."); }
+		return {"n": lhs.n.concat(rhs.n), "d": lhs.d.concat(rhs.d)};
+	}
+
+	this.mult = function(lhs, rhs) {
+		var pc = this;
+		var cross = lhs.map(function(x) {
+			return rhs.map(function(y) {
+				return pc.multSingle(x,y);
+			});
+		});
+		return assocFoldr(cross, pc.add);
+	}
+}
+
 function geomTests() {
 	var gt = this;
 	this.tests = [];
@@ -550,7 +575,15 @@ function geomTests() {
 		return assocFoldr(numeric, function(a,b) {return a+b; })
 			+ " tests out of " + numeric.length + " passed.";
 	}
+	// start polynomial tests
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var num1 = pc.num(1), num2 = pc.num(2), num3 = pc.num(3), num4 = pc.num(4);
+		console.log(JSON.stringify(pc.mult(pc.add(num1, num2), pc.add(num3, num4))));
+		return false;
+	});
 
+	// start geometry tests
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });
 	this.tests.push(function() { return gt.validityExamples(" line(point(a,0), point(0,1)) ", false); });
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,a)) ", false); });
@@ -648,6 +681,8 @@ function geomTests() {
 		var arr = cp.assignRead(str);
 		return arr.length == 2 && arr[0].name=="a";
 	});
+
+	// start matrix tests
 	this.tests.push(function() {
 		var mc = new MtxCalc();
 		var out = mc.vectMult([1,2,3],[3,2,1]);

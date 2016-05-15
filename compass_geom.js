@@ -596,7 +596,32 @@ function PolyCalc() {
 				return pc.multSingle(x,y);
 			});
 		});
-		return assocFoldr(cross, pc.add);
+		return assocFoldr(cross, function(a,b) { return pc.add(a,b); });
+	}
+
+	this.classifyTerms = function (lhs, tok) {
+		var output = [];
+		var count = 0;
+		var accum;
+
+		for (var i in lhs) {
+			count = 0;
+			accum = this.num(0);
+			for (var j in lhs[i].n){
+				if (lhs[i].n[j] == tok) { count++; }
+			}
+			accum[0].n = lhs[i].n.filter(function(x) { return x != tok; });
+			accum[0].d = lhs[i].d.filter(function(x) { return true; });			if (!output[count]) {
+				output[count] = accum;
+			} else {
+				output[count] = this.add(output[count], accum);
+			}
+		}
+		for (var i = 0; i < output.length; i++) {
+			if (!output[i]) { output[i] = this.num(0); }
+		}
+
+		return output;
 	}
 }
 
@@ -656,6 +681,16 @@ function geomTests() {
 		var pc = new PolyCalc();
 		var num1 = pc.num(1), num2 = pc.num(2), num3 = pc.num(3), num4 = pc.num(4);
 		return pc.eval(pc.mult(pc.add(num1, num2), pc.add(num3, num4)), 0) == (1+2)*(3+4);
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var t1 = pc.add(pc.num(2), pc.num("x"));
+		var t2 = pc.add(pc.num(-2), pc.num("x"));
+		var t3 = pc.mult(t1,t2);
+		var cls = pc.classifyTerms(t3,"x");
+		return pc.eval(cls[2])== 1
+			&& pc.eval(cls[1])== 0
+			&& pc.eval(cls[0])== -4;
 	});
 
 	// start geometry tests

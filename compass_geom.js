@@ -526,6 +526,28 @@ function MtxCalc() {
 
 		return output;
 	}
+
+	this.submatrix = function(mtx, i, j) {
+		var output = mtx.slice(0,i).concat(mtx.slice(i+1));
+		return output.map(function(x) {return x.slice(0,j).concat(x.slice(j+1)) });
+	}
+
+	this.det = function(mtx) {
+		var accum = 0;
+		if (!mtx || mtx.length != this.cols(mtx)) {
+			throw("Must be square matrix.");
+		}
+		if (mtx.length == 1) { return mtx[0][0]; }
+		else if (mtx.length == 2) {
+			return mtx[0][0]*mtx[1][1] - mtx[0][1]*mtx[1][0];
+		}
+
+		for (var i = 0; i < mtx.length; i++) {
+			accum += (i%2==0 ? 1 : -1)*mtx[0][i]*this.det(this.submatrix(mtx,0,i));
+		}
+
+		return accum;
+	}
 }
 
 function PolyCalc() {
@@ -928,6 +950,26 @@ function geomTests() {
 		var mtx1 = [[1,2,3],[4,5,6],[7,8,9]];
 		var mtx2 = [[1,4,7],[2,5,8],[3,6,9]];
 		return mc.mtxEqual(mc.transpose(mtx1),mtx2);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var mtx1 = [[1,2,3],[4,5,6],[7,8,9]];
+		return mc.mtxEqual(mc.submatrix(mtx1,2,1), [[1,3],[4,6]]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var mtx1 = [[1,2,3],[4,5,6],[7,8,9]];
+		return mc.det(mtx1) == 0;
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var mtx2 = [[1,2,3],[-4,5,6],[7,-8,9]];
+		return mc.det(mtx2) == 240;
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var mtx1 = [[1,0,0],[0,5,0],[0,0,9]];
+		return mc.det(mtx1) == 45;
 	});
 }
 

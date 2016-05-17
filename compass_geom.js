@@ -532,18 +532,37 @@ function MtxCalc() {
 		return output.map(function(x) {return x.slice(0,j).concat(x.slice(j+1)) });
 	}
 
+	this.mtxToPoly = function(mtx) {
+		var pc = new PolyCalc();
+		return mtx.map(function(x) {
+			return x.map(function(y) {
+				return pc.num(y);
+			});
+		});
+	}
+
 	this.det = function(mtx) {
-		var accum = 0;
+		var pc = new PolyCalc();
+		var output = this.detPoly(this.mtxToPoly(mtx));
+		return pc.eval(output);
+	}
+
+	// this is the determinant by cofactor expansion.
+	// to complicate matters further, it assumes
+	// matrix entries are polynomials rather than numbers
+	this.detPoly = function(mtx) {
+		var pc = new PolyCalc();
+		var accum = pc.num(0);
 		if (!mtx || mtx.length != this.cols(mtx)) {
 			throw("Must be square matrix.");
 		}
 		if (mtx.length == 1) { return mtx[0][0]; }
 		else if (mtx.length == 2) {
-			return mtx[0][0]*mtx[1][1] - mtx[0][1]*mtx[1][0];
+			return pc.add(pc.mult(mtx[0][0],mtx[1][1]), pc.mult(pc.num(-1),pc.mult(mtx[0][1],mtx[1][0])));
 		}
 
 		for (var i = 0; i < mtx.length; i++) {
-			accum += (i%2==0 ? 1 : -1)*mtx[0][i]*this.det(this.submatrix(mtx,0,i));
+			accum = pc.add(accum,pc.mult(pc.num(i%2==0 ? 1 : -1),pc.mult(mtx[0][i],this.detPoly(this.submatrix(mtx,0,i)))));
 		}
 
 		return accum;

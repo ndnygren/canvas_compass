@@ -567,6 +567,16 @@ function MtxCalc() {
 
 		return accum;
 	}
+
+	this.characteristic = function(mtx) {
+		var pc = new PolyCalc();
+		var minusx = pc.mult(pc.num(-1),pc.num("x"));
+		var temp = this.mtxToPoly(mtx);
+		for (var i = 0; i < mtx.length; i++) {
+			temp[i][i] = pc.add(temp[i][i], minusx);
+		}
+		return pc.classifyTerms(this.detPoly(temp), "x").map(function(x) { return pc.eval(x); });
+	}
 }
 
 function PolyCalc() {
@@ -989,6 +999,11 @@ function geomTests() {
 		var mc = new MtxCalc();
 		var mtx1 = [[1,0,0],[0,5,0],[0,0,9]];
 		return mc.det(mtx1) == 45;
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var mtx1 = [[1,0,0],[0,1,0],[0,0,1]];
+		return mc.vectEqual(mc.characteristic(mtx1),[1,-3,3,-1]);
 	});
 }
 

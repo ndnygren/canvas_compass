@@ -674,6 +674,42 @@ function PolyCalc() {
 
 		return output;
 	}
+
+	this.degree = function(arr) {
+		var max = 0;
+		for (var i=0; i < arr.length; i++) {
+			if (arr[i] != 0) { max = i; }
+		}
+		return max;
+	}
+
+	this.leadingCoef = function (arr) {
+		var max = this.degree(arr);
+		return arr.length > max ? arr[max] : 0;
+	}
+
+	// Euclidean division of polynomials
+	this.coefDivide = function (num,denom) {
+		var mc = new MtxCalc();
+		var output = {"q":[0], "r":mc.vectCopy(num)};
+		var d = this.degree(denom);
+		var c = this.leadingCoef(denom);
+		var s, mag;
+
+		while (this.degree(output.r) >= d) {
+			s = this.leadingCoef(output.r)/c;
+			mag = this.degree(output.r)-d;
+			output.q[mag] = output.q[mag] ? output.q[mag] + s : s;
+			for (var i = 0; i < denom.length; i++) {
+				output.r[i+mag] -= s*denom[i];
+			}
+		}
+		while (output.r.length > 0 && output.r[output.r.length-1]==0) {
+			output.r.pop();
+		}
+
+		return output;
+	}
 }
 
 function geomTests() {
@@ -743,6 +779,15 @@ function geomTests() {
 			&& pc.eval(cls[1])== 0
 			&& pc.eval(cls[0])== -4;
 	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var mc = new MtxCalc();
+		var p1 = [1,0,-1];
+		var p2 = [-1,1];
+		var obj = pc.coefDivide(p1,p2);
+		return mc.vectEqual([],obj.r);
+	});
+
 
 	// start geometry tests
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });

@@ -710,6 +710,22 @@ function PolyCalc() {
 
 		return output;
 	}
+
+	this.coefMult = function(lhs,rhs) {
+		var output = [];
+		for (var i = 0; i < lhs.length+rhs.length-1; i++) {
+			output.push(0);
+		}
+		for (var i = 0; i < lhs.length; i++) {
+			for (var j = 0; j < rhs.length; j++) {
+				output[i+j] += lhs[i] * rhs[j];
+			}
+		}
+/*		console.log(JSON.stringify(lhs) + "*" +
+		JSON.stringify(rhs) + " = " +
+		JSON.stringify(output));*/
+		return output;
+	}
 }
 
 function geomTests() {
@@ -786,6 +802,16 @@ function geomTests() {
 		var p2 = [-1,1];
 		var obj = pc.coefDivide(p1,p2);
 		return mc.vectEqual([],obj.r);
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var mc = new MtxCalc();
+		return mc.vectEqual(pc.coefMult([2,1],[1,1]), [2,3,1]);
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var mc = new MtxCalc();
+		return mc.vectEqual(pc.coefMult([-2,1],[2,3,1]), [-4,-4,1,1]);
 	});
 
 

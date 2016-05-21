@@ -726,6 +726,33 @@ function PolyCalc() {
 		JSON.stringify(output));*/
 		return output;
 	}
+
+	// floating point to integer pair conversion using continued fractions.
+	this.rat = function(input) {
+		var d_arr = [];
+		var remd = input, whole = 0, temp;
+		var output = {"n": 0, "d" : 1};
+		for (var i = 0; i < 5 && remd != 0; i++) {
+			whole = Math.floor(remd);
+			d_arr.push(whole);
+			remd -= whole;
+			if (Math.abs(remd) > 0.0001) { remd = 1.0 / remd; }
+			else { remd = 0; }
+		}
+		if (d_arr.length == 0) { return output; }
+		else {
+			output.n = d_arr[d_arr.length - 1];
+			d_arr.pop();
+		}
+		for (var i = d_arr.length - 1; i>= 0; i--) {
+			temp = output.n;
+			output.n = output.d;
+			output.d = temp;
+			output.n += d_arr[i] * output.d;
+		}
+
+		return output;
+	}
 }
 
 function geomTests() {
@@ -813,7 +840,11 @@ function geomTests() {
 		var mc = new MtxCalc();
 		return mc.vectEqual(pc.coefMult([-2,1],[2,3,1]), [-4,-4,1,1]);
 	});
-
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var mc = new MtxCalc();
+		return pc.rat(-1.44444444444444).n == -13;
+	});
 
 	// start geometry tests
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });

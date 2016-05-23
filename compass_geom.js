@@ -704,6 +704,9 @@ function PolyCalc() {
 				output.r[i+mag] -= s*denom[i];
 			}
 		}
+		for (var i = 0; i < output.q.length; i++) {
+			output.q[i] = output.q[i] == null ? 0 : output.q[i];
+		}
 		while (output.r.length > 0 && output.r[output.r.length-1]==0) {
 			output.r.pop();
 		}
@@ -750,6 +753,30 @@ function PolyCalc() {
 			output.d = temp;
 			output.n += d_arr[i] * output.d;
 		}
+
+		return output;
+	}
+
+	this.rationalRoots = function(input) {
+		var output = [];
+		var temp;
+		var accum = input;
+
+		for (var i = 0; i*i <= Math.abs(input[0]); i++) {
+			if (accum[0] % i == 0) {
+				temp = this.coefDivide(accum, [-i, 1]);
+				if (temp.r.length == 0) {
+					output.push([-i,1]);
+					accum = temp.q;
+				}
+				temp = this.coefDivide(accum, [i, 1]);
+				if (temp.r.length == 0) {
+					output.push([i,1]);
+					accum = temp.q;
+				}
+			}
+		}
+		if (accum.length > 1) { output.push(accum); }
 
 		return output;
 	}
@@ -844,6 +871,12 @@ function geomTests() {
 		var pc = new PolyCalc();
 		var mc = new MtxCalc();
 		return pc.rat(-1.44444444444444).n == -13;
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var mc = new MtxCalc();
+		var roots = pc.rationalRoots([2,3,1]);
+		return mc.vectEqual(pc.coefMult(roots[0],roots[1]), [2,3,1]);
 	});
 
 	// start geometry tests

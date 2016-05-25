@@ -357,4 +357,16 @@ function geomTests() {
 		var mtx1 = [[1,0,0],[0,1,0],[0,0,1]];
 		return mc.vectEqual(mc.characteristic(mtx1),[1,-3,3,-1]);
 	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		return mc.isZeroVect([0,0,0,0])
+			&& !mc.isZeroVect([0,1,0,0]);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var mtx = [[1,0,2,3],[0,1,0,4],[0,2,0,8],[0,3,0,12]];
+		var basis = mc.kernelSpace(mtx);
+		return mc.isZeroVect(mc.mtxVectMult(mtx,basis[0]),
+			mc.mtxVectMult(mtx,basis[1]));
+	});
 }

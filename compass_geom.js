@@ -577,6 +577,27 @@ function MtxCalc() {
 		}
 		return pc.classifyTerms(this.detPoly(temp), "x").map(function(x) { return pc.eval(x); });
 	}
+
+	this.isZeroVect = function(input) {
+		return assocFoldr(input.map(function(x) {
+			return x == 0;
+		}), function (a,b) {
+			return a && b;
+		});
+	}
+	this.kernelSpace = function(input) {
+		var output = [];
+		var temp;
+		var mtx = this.transpose(this.reduce(input));
+		for (var i = 0; i < mtx.length; i++) {
+			if (mtx[i][i] == 0) {
+				temp = this.scaleVect(-1, mtx[i]);
+				temp[i] = 1;
+				output.push(temp);
+			}
+		}
+		return output;
+	}
 }
 
 function PolyCalc() {

@@ -95,6 +95,14 @@ function geomTests() {
 		var roots = pc.rationalRoots([2,3,1]);
 		return mc.vectEqual(pc.coefMult(roots[0],roots[1]), [2,3,1]);
 	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		return pc.gcd(12,8) == 4 && pc.gcd(12,7)==1;
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		return pc.gcdArray([6,15,99]) == 3;
+	});
 
 	// start geometry tests
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });

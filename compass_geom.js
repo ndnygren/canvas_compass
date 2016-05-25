@@ -801,6 +801,21 @@ function PolyCalc() {
 
 		return output;
 	}
+	this.gcd = function(a,b) {
+		var l = Math.max(a,b);
+		var r = Math.min(a,b);
+		var temp;
+		while (r > 0) {
+			temp = l%r;
+			l = r;
+			r = temp;
+		}
+		return l;
+	}
+	this.gcdArray = function(arr) {
+		var pc = this;
+		return assocFoldr(arr, pc.gcd);
+	}
 }
 
 

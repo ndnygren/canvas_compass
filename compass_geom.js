@@ -598,6 +598,23 @@ function MtxCalc() {
 		}
 		return output;
 	}
+
+	this.eigenValues = function(input) {
+		if (input.length != this.cols(input)) {
+			throw(JSON.stringify(input) + " is not a square matrix.");
+		}
+
+		var pc = new PolyCalc();
+		var chp = this.characteristic(input);
+		var factors = pc.factor(chp);
+		var roots = factors.map(function(x) {
+			if (!x || x.length != 2 || isNaN(x[0])) {
+				throw("failed to factor: " + JSON.stringify(x));
+			}
+			return x[0]/x[1];
+		});
+		return roots;
+	}
 }
 
 function PolyCalc() {
@@ -784,7 +801,7 @@ function PolyCalc() {
 		var accum = input;
 
 		for (var i = 0; i*i <= Math.abs(input[0]); i++) {
-			if (accum[0] % i == 0) {
+			if (i === 0 || accum[0] % i == 0) {
 				temp = this.coefDivide(accum, [-i, 1]);
 				if (temp.r.length == 0) {
 					output.push([-i,1]);
@@ -797,7 +814,11 @@ function PolyCalc() {
 				}
 			}
 		}
-		if (accum.length > 1) { output.push(accum); }
+		if (accum.length > 1 && output.length == 0) {
+			output.push(accum);
+		} else if (accum.length > 1) {
+			 output = output.concat(this.rationalRoots(accum));
+		}
 
 		return output;
 	}
@@ -815,6 +836,9 @@ function PolyCalc() {
 	this.gcdArray = function(arr) {
 		var pc = this;
 		return assocFoldr(arr, pc.gcd);
+	}
+	this.factor = function (input) {
+		return this.rationalRoots(input);
 	}
 }
 

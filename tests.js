@@ -377,4 +377,11 @@ function geomTests() {
 		return mc.isZeroVect(mc.mtxVectMult(mtx,basis[0]),
 			mc.mtxVectMult(mtx,basis[1]));
 	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var mtx = [[1,0,2,3],[0,1,0,4],[0,2,0,8],[0,3,0,12]];
+		var eig = mc.eigenValues(mtx);
+		eig.sort( function(a,b){return a-b;});
+		return mc.vectEqual([-13,-1,0,0], eig);
+	});
 }

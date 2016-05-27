@@ -611,9 +611,16 @@ function MtxCalc() {
 			if (!x || x.length != 2 || isNaN(x[0])) {
 				throw("failed to factor: " + JSON.stringify(x));
 			}
-			return x[0]/x[1];
+			return -x[0]/x[1];
 		});
 		return roots;
+	}
+	// takes a matrix and one of the preivously
+	// discovered eigenvalues as argument
+	this.eigenVectors = function(input, ev) {
+		var size = input.length;
+		var mtx2 = this.mtxAdd(input, this.scaleMtx(-ev, this.makeId(size)));
+		return this.kernelSpace(mtx2);
 	}
 }
 

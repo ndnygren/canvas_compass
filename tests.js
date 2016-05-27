@@ -382,6 +382,19 @@ function geomTests() {
 		var mtx = [[1,0,2,3],[0,1,0,4],[0,2,0,8],[0,3,0,12]];
 		var eig = mc.eigenValues(mtx);
 		eig.sort( function(a,b){return a-b;});
-		return mc.vectEqual([-13,-1,0,0], eig);
+		return mc.vectEqual([0,0,1,13], eig);
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var mtx = [[1,0,2,3],[0,1,0,4],[0,2,0,8],[0,3,0,12]];
+		var ev = mc.eigenVectors(mtx,0);
+		return mc.isZeroVect(mc.mtxVectMult(mtx,ev[0]))
+			&&  mc.isZeroVect(mc.mtxVectMult(mtx,ev[1]));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var mtx = [[1,0,2,3],[0,1,0,4],[0,2,0,8],[0,3,0,12]];
+		var ev = mc.eigenVectors(mtx,13);
+		return mc.vectEqual(mc.mtxVectMult(mtx,ev[0]),mc.scaleVect(13, ev[0]));
 	});
 }

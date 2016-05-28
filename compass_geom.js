@@ -847,6 +847,13 @@ function PolyCalc() {
 	this.factor = function (input) {
 		return this.rationalRoots(input);
 	}
+
+	this.pairBijection = function(x) {
+		var n = Math.floor(Math.sqrt(2*x + 1/4) - 1/2);
+		var r = x - (n*n+n)/2;
+		var l = n - r;
+		return [l,r];
+	}
 }
 
 

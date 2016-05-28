@@ -103,6 +103,16 @@ function geomTests() {
 		var pc = new PolyCalc();
 		return pc.gcdArray([6,15,99]) == 3;
 	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var mc = new MtxCalc();
+		var arr = [ [0,0,0], [1,1,0], [2,0,1], [3,2,0], [4,1,1], [5,0,2], [6,3,0], [7,2,1], [8,1,2] ];
+		var output = true;
+		for (var i = 0; i < arr.length; i++) {
+			output = output && mc.vectEqual(pc.pairBijection(arr[i][0]),[arr[i][1], arr[i][2]]);
+		}
+		return output;
+	});
 
 	// start geometry tests
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });

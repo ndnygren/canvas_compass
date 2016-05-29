@@ -113,6 +113,17 @@ function geomTests() {
 		}
 		return output;
 	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var p;
+		var accum = true;
+		for (var i = 0; i < 100; i++) {
+			p = pc.pairBijection(i);
+			j = pc.pairBijectionRev(p[0],p[1]);
+			accum = accum && (i==j);
+		}
+		return accum;
+	});
 
 	// start geometry tests
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });

@@ -854,6 +854,10 @@ function PolyCalc() {
 		var l = n - r;
 		return [l,r];
 	}
+	this.pairBijectionRev = function(l,r) {
+		var n = l+r;
+		return ((n*n+n)/2) +r;
+	}
 }
 
 

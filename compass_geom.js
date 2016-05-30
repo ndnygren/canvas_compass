@@ -575,7 +575,7 @@ function MtxCalc() {
 		for (var i = 0; i < mtx.length; i++) {
 			temp[i][i] = pc.add(temp[i][i], minusx);
 		}
-		return pc.classifyTerms(this.detPoly(temp), "x").map(function(x) { return pc.eval(x); });
+		return pc.coefNormalize(pc.classifyTerms(this.detPoly(temp), "x"));
 	}
 
 	this.isZeroVect = function(input) {
@@ -830,8 +830,8 @@ function PolyCalc() {
 		return output;
 	}
 	this.gcd = function(a,b) {
-		var l = Math.max(a,b);
-		var r = Math.min(a,b);
+		var l = Math.max(Math.abs(a), Math.abs(b));
+		var r = Math.min(Math.abs(a), Math.abs(b));
 		var temp;
 		while (r > 0) {
 			temp = l%r;
@@ -857,6 +857,17 @@ function PolyCalc() {
 	this.pairBijectionRev = function(l,r) {
 		var n = l+r;
 		return ((n*n+n)/2) +r;
+	}
+
+	this.coefNormalize = function(arr) {
+		var mc = new MtxCalc();
+		var numers = arr.map(function(x) {return x[0]["n"][0]; });
+		var denoms = arr.map(function(x) {return x[0]["d"][0]; });
+		var global_d = assocFoldr(denoms, function(a,b) {return a*b;});
+		var temp = numers.map(function (x) { return x*global_d; });
+		var g = this.gcdArray(temp);
+		if (temp[temp.length-1] < 0) { g *= -1; }
+		return temp.map(function(x) { return x / g; });
 	}
 }
 

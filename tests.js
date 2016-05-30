@@ -124,6 +124,22 @@ function geomTests() {
 		}
 		return accum;
 	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		return pc.gcd(-1,3) == 1 && pc.gcd(0,3) == 3;
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var mc = new MtxCalc();
+		var mtx = [[1,2,3],[4,5,6],[7,8,9]];
+                var minusx = pc.mult(pc.num(-1),pc.num("x"));
+                var temp = mc.mtxToPoly(mtx);
+                for (var i = 0; i < mtx.length; i++) {
+                        temp[i][i] = pc.add(temp[i][i], minusx);
+                }
+		var ch = pc.coefNormalize(pc.classifyTerms(mc.detPoly(temp), "x"));
+		return mc.vectEqual(ch, [0,-18,-15,1]);
+	});
 
 	// start geometry tests
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });
@@ -384,7 +400,7 @@ function geomTests() {
 	this.tests.push(function() {
 		var mc = new MtxCalc();
 		var mtx1 = [[1,0,0],[0,1,0],[0,0,1]];
-		return mc.vectEqual(mc.characteristic(mtx1),[1,-3,3,-1]);
+		return mc.vectEqual(mc.characteristic(mtx1),[-1,3,-3,1]);
 	});
 	this.tests.push(function() {
 		var mc = new MtxCalc();

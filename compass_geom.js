@@ -806,18 +806,20 @@ function PolyCalc() {
 		var output = [];
 		var temp;
 		var accum = input;
-
-		for (var i = 0; i*i <= Math.abs(input[0]); i++) {
-			if (i === 0 || accum[0] % i == 0) {
-				temp = this.coefDivide(accum, [-i, 1]);
-				if (temp.r.length == 0) {
-					output.push([-i,1]);
-					accum = temp.q;
-				}
-				temp = this.coefDivide(accum, [i, 1]);
-				if (temp.r.length == 0) {
-					output.push([i,1]);
-					accum = temp.q;
+		for (var j = 1; j <= Math.abs(input[input.length-1]); j++) {
+			for (var i = 0; i*i <= Math.abs(input[0]); i++) {
+				if (i === 0 || (j != 0 && accum[0] % i == 0
+						&& accum[accum.length-1] % j == 0)) {
+					temp = this.coefDivide(accum, [-i, j]);
+					if (temp.r.length == 0) {
+						output.push([-i,j]);
+						accum = temp.q;
+					}
+					temp = this.coefDivide(accum, [i, j]);
+					if (temp.r.length == 0) {
+						output.push([i,j]);
+						accum = temp.q;
+					}
 				}
 			}
 		}

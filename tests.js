@@ -140,6 +140,17 @@ function geomTests() {
 		var ch = pc.coefNormalize(pc.classifyTerms(mc.detPoly(temp), "x"));
 		return mc.vectEqual(ch, [0,-18,-15,1]);
 	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var mc = new MtxCalc();
+		var x = pc.num("x");
+		var fact = pc.add(pc.mult(pc.num(2),x), pc.num(-1));
+		var p = pc.mult(fact,fact);
+		var coef = pc.coefNormalize(pc.classifyTerms(p, "x"));
+		var refact = pc.factor(coef);
+		return refact.length == 2 && refact[0].length == 2
+			&& mc.vectEqual(refact[0],[-1,2]);
+	});
 
 	// start geometry tests
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });

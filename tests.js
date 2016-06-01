@@ -151,6 +151,15 @@ function geomTests() {
 		return refact.length == 2 && refact[0].length == 2
 			&& mc.vectEqual(refact[0],[-1,2]);
 	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
+		var mc = new MtxCalc();
+		var p = pc.coefMult(pc.coefMult([-2,0,1],[-5,0,1]),[1,1]);
+		var fact = pc.factor(p);
+		return mc.vectEqual(fact[0],[-2,0,1])
+			|| mc.vectEqual(fact[1],[-2,0,1])
+			|| mc.vectEqual(fact[2],[-2,0,1]);
+	});
 
 	// start geometry tests
 	this.tests.push(function() { return gt.validityExamples(" line(point(1,0), point(0,1)) ", true); });

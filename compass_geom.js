@@ -846,8 +846,36 @@ function PolyCalc() {
 		var pc = this;
 		return assocFoldr(arr, pc.gcd);
 	}
+
+	// find the quadratic factors of a coef array polynomial.
+	// specifcally the ones without rational roots.
+	this.findQuadFactors = function(input) {
+		if (input.length < 4) { return [input]; }
+		var pc = this;
+		var a = 1, b = 0, c = 0, temp, result, comb;
+		for (var i = 0; a <= this.leadingCoef(input) + 1; i++) {
+			temp = this.pairBijection(i);
+			c = temp[0] + 1;
+			temp = this.pairBijection(temp[1]);
+			b = temp[0];
+			a = temp[1] + 1;
+			if (input[0] % c == 0 && this.leadingCoef(input) % a == 0){
+				comb = [[c,b,a],[-c,b,a],[c,-b,a],[-c,-b,a]];
+				result = comb.map(function (x) {return pc.coefDivide(input, x); } );
+				for (var j in result) {
+					if (result[j].r.length == 0) {
+						return [result[j].q, comb[j]];
+					}
+				}
+			}
+		}
+		return [input];
+	}
+
 	this.factor = function (input) {
-		return this.rationalRoots(input);
+		var pc = this;
+		var fact = this.rationalRoots(input).map(function(x) {return pc.findQuadFactors(x);});
+		return assocFoldr(fact, function(a,b){return a.concat(b);});
 	}
 
 	this.pairBijection = function(x) {

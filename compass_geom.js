@@ -348,29 +348,46 @@ function ProjectiveCalc() {
 }
 
 function MtxCalc() {
+	/************************
+	* Start number specific
+	************************/
+
+	this.zero = 0.0;
+	this.one = 1.0;
+	this.singleAdd = function (a,b) { return a+b; }
+	this.singleMult = function (a,b) { return a*b; }
+	this.singleEqual = function(a,b) { return Math.abs(a-b) < 0.000001; }
+
+	/************************
+	* End number specific
+	************************/
+
 	this.vectEqual = function(a,b) {
+		var mc = this;
 		if (a.length != b.length) { return false; }
 		if (a.length == 0) { return true; }
 		return assocFoldr(zippr(a,b, function(a,b) {
-			return Math.abs(a-b) < 0.000001;
+			return mc.singleEqual(a,b);
 		}), function(a,b) {
 			return a && b;
 		});
 	}
 
 	this.vectMult = function(a,b) {
+		var mc = this;
 		if (a.length != b.length) { throw("Vector size mismatch."); }
 		return assocFoldr(zippr(a,b, function(a,b) {
-			return a * b;
+			return mc.singleMult(a,b);
 		}), function(a,b) {
-			return a + b;
+			return mc.singleAdd(a,b);
 		});
 	}
 
 	this.vectAdd = function(a,b) {
+		var mc = this;
 		if (a.length != b.length) { throw("Vector size mismatch."); }
 		return zippr(a,b, function(a,b) {
-			return a + b;
+			return mc.singleAdd(a,b);
 		});
 	}
 
@@ -394,7 +411,8 @@ function MtxCalc() {
 	}
 
 	this.scaleVect = function(s, vect) {
-		return vect.map(function(x) { return s*x; });
+		var mc = this;
+		return vect.map(function(x) { return mc.singleMult(s,x); });
 	}
 
 	this.scaleMtx = function(s, mtx) {
@@ -425,9 +443,7 @@ function MtxCalc() {
 			output.push([]);
 			for (var col = 0; col < this.cols(m2); col++){
 				output[row].push(0);
-				for (var k = 0; k < m2.length; k++) {
-					output[row][col] += m1[row][k]*m2[k][col];
-				}
+				output[row][col] = this.vectMult(m1[row], this.selectCol(col,m2));
 			}
 		}
 		return output;
@@ -447,7 +463,7 @@ function MtxCalc() {
 		for (var i = 0; i < dim ; i++) {
 			output.push([]);
 			for (var j = 0; j < dim; j++) {
-				output[i].push(0);
+				output[i].push(this.zero);
 			}
 		}
 		return output;
@@ -456,7 +472,7 @@ function MtxCalc() {
 	this.makeId = function(dim) {
 		var output = this.makeZero(dim);
 		for (var i = 0; i < dim; i++) {
-			output[i][i] = 1;
+			output[i][i] = this.one;
 		}
 		return output;
 	}
@@ -579,8 +595,9 @@ function MtxCalc() {
 	}
 
 	this.isZeroVect = function(input) {
+		var mc = this;
 		return assocFoldr(input.map(function(x) {
-			return x == 0;
+			return mc.singleEqual(x, mc.zero);
 		}), function (a,b) {
 			return a && b;
 		});

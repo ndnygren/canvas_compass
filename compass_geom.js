@@ -357,6 +357,10 @@ function MtxCalc() {
 	this.singleAdd = function (a,b) { return a+b; }
 	this.singleMult = function (a,b) { return a*b; }
 	this.singleEqual = function(a,b) { return Math.abs(a-b) < 0.000001; }
+	this.abs = function(x) { return Math.abs(x); }
+	this.order = function(a,b) { return a < b; }
+	this.multInv = function(x) { return 1/x; }
+	this.addInv = function(x) { return -x; }
 
 	/************************
 	* End number specific
@@ -478,11 +482,11 @@ function MtxCalc() {
 	}
 
 	this.swapHighestMagOnRow = function(row, mtx) {
-		var max = Math.abs(mtx[row][row]), maxidx = row;
+		var max = this.abs(mtx[row][row]), maxidx = row;
 		var temp;
 		for (var k = row+1; k < mtx.length; k++) {
-			if (Math.abs(mtx[k][row]) > max){
-				max = Math.abs(mtx[k][row]);
+			if (this.abs(mtx[k][row]) > max){
+				max = this.abs(mtx[k][row]);
 				maxidx = k;
 			}
 		}
@@ -496,12 +500,12 @@ function MtxCalc() {
 		var temp;
 		for (var row = 0; row < mtx.length; row++) {
 			this.swapHighestMagOnRow(row,output);
-			if (output[row][row] != 0){
-				output[row] = this.scaleVect(1/output[row][row], output[row]);
+			if (!this.singleEqual(output[row][row], this.zero)) {
+				output[row] = this.scaleVect(this.multInv(output[row][row]), output[row]);
 			}
 			for (var k = 0; k < mtx.length; k++) {
-				if (k != row && output[k][row] != 0) {
-					temp = this.scaleVect(-output[k][row], output[row]);
+				if (k != row && !this.singleEqual(output[k][row], this.zero)) {
+					temp = this.scaleVect(this.addInv(output[k][row]), output[row]);
 					output[k] = this.vectAdd(temp, output[k]);
 				}
 

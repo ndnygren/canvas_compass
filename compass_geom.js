@@ -348,19 +348,20 @@ function ProjectiveCalc() {
 }
 
 function MtxCalc() {
+	this.ll = {};
 	/************************
 	* Start number specific
 	************************/
 
-	this.zero = 0.0;
-	this.one = 1.0;
-	this.singleAdd = function (a,b) { return a+b; }
-	this.singleMult = function (a,b) { return a*b; }
-	this.singleEqual = function(a,b) { return Math.abs(a-b) < 0.000001; }
-	this.abs = function(x) { return Math.abs(x); }
-	this.order = function(a,b) { return a < b; }
-	this.multInv = function(x) { return 1/x; }
-	this.addInv = function(x) { return -x; }
+	this.ll.zero = 0.0;
+	this.ll.one = 1.0;
+	this.ll.singleAdd = function (a,b) { return a+b; }
+	this.ll.singleMult = function (a,b) { return a*b; }
+	this.ll.singleEqual = function(a,b) { return Math.abs(a-b) < 0.000001; }
+	this.ll.abs = function(x) { return Math.abs(x); }
+	this.ll.order = function(a,b) { return a < b; }
+	this.ll.multInv = function(x) { return 1/x; }
+	this.ll.addInv = function(x) { return -x; }
 
 	/************************
 	* End number specific
@@ -371,7 +372,7 @@ function MtxCalc() {
 		if (a.length != b.length) { return false; }
 		if (a.length == 0) { return true; }
 		return assocFoldr(zippr(a,b, function(a,b) {
-			return mc.singleEqual(a,b);
+			return mc.ll.singleEqual(a,b);
 		}), function(a,b) {
 			return a && b;
 		});
@@ -381,9 +382,9 @@ function MtxCalc() {
 		var mc = this;
 		if (a.length != b.length) { throw("Vector size mismatch."); }
 		return assocFoldr(zippr(a,b, function(a,b) {
-			return mc.singleMult(a,b);
+			return mc.ll.singleMult(a,b);
 		}), function(a,b) {
-			return mc.singleAdd(a,b);
+			return mc.ll.singleAdd(a,b);
 		});
 	}
 
@@ -391,7 +392,7 @@ function MtxCalc() {
 		var mc = this;
 		if (a.length != b.length) { throw("Vector size mismatch."); }
 		return zippr(a,b, function(a,b) {
-			return mc.singleAdd(a,b);
+			return mc.ll.singleAdd(a,b);
 		});
 	}
 
@@ -416,7 +417,7 @@ function MtxCalc() {
 
 	this.scaleVect = function(s, vect) {
 		var mc = this;
-		return vect.map(function(x) { return mc.singleMult(s,x); });
+		return vect.map(function(x) { return mc.ll.singleMult(s,x); });
 	}
 
 	this.scaleMtx = function(s, mtx) {
@@ -446,7 +447,7 @@ function MtxCalc() {
 		for (var row = 0; row < m1.length; row++) {
 			output.push([]);
 			for (var col = 0; col < this.cols(m2); col++){
-				output[row].push(0);
+				output[row].push(this.ll.zero);
 				output[row][col] = this.vectMult(m1[row], this.selectCol(col,m2));
 			}
 		}
@@ -467,7 +468,7 @@ function MtxCalc() {
 		for (var i = 0; i < dim ; i++) {
 			output.push([]);
 			for (var j = 0; j < dim; j++) {
-				output[i].push(this.zero);
+				output[i].push(this.ll.zero);
 			}
 		}
 		return output;
@@ -476,17 +477,17 @@ function MtxCalc() {
 	this.makeId = function(dim) {
 		var output = this.makeZero(dim);
 		for (var i = 0; i < dim; i++) {
-			output[i][i] = this.one;
+			output[i][i] = this.ll.one;
 		}
 		return output;
 	}
 
 	this.swapHighestMagOnRow = function(row, mtx) {
-		var max = this.abs(mtx[row][row]), maxidx = row;
+		var max = this.ll.abs(mtx[row][row]), maxidx = row;
 		var temp;
 		for (var k = row+1; k < mtx.length; k++) {
-			if (this.abs(mtx[k][row]) > max){
-				max = this.abs(mtx[k][row]);
+			if (this.ll.abs(mtx[k][row]) > max){
+				max = this.ll.abs(mtx[k][row]);
 				maxidx = k;
 			}
 		}
@@ -500,12 +501,12 @@ function MtxCalc() {
 		var temp;
 		for (var row = 0; row < mtx.length; row++) {
 			this.swapHighestMagOnRow(row,output);
-			if (!this.singleEqual(output[row][row], this.zero)) {
-				output[row] = this.scaleVect(this.multInv(output[row][row]), output[row]);
+			if (!this.ll.singleEqual(output[row][row], this.ll.zero)) {
+				output[row] = this.scaleVect(this.ll.multInv(output[row][row]), output[row]);
 			}
 			for (var k = 0; k < mtx.length; k++) {
-				if (k != row && !this.singleEqual(output[k][row], this.zero)) {
-					temp = this.scaleVect(this.addInv(output[k][row]), output[row]);
+				if (k != row && !this.ll.singleEqual(output[k][row], this.ll.zero)) {
+					temp = this.scaleVect(this.ll.addInv(output[k][row]), output[row]);
 					output[k] = this.vectAdd(temp, output[k]);
 				}
 
@@ -601,19 +602,20 @@ function MtxCalc() {
 	this.isZeroVect = function(input) {
 		var mc = this;
 		return assocFoldr(input.map(function(x) {
-			return mc.singleEqual(x, mc.zero);
+			return mc.ll.singleEqual(x, mc.ll.zero);
 		}), function (a,b) {
 			return a && b;
 		});
 	}
 	this.kernelSpace = function(input) {
+		var mc = this;
 		var output = [];
 		var temp;
 		var mtx = this.transpose(this.reduce(input));
 		for (var i = 0; i < mtx.length; i++) {
 			if (mtx[i][i] == 0) {
-				temp = this.scaleVect(-1, mtx[i]);
-				temp[i] = 1;
+				temp = mtx[i].map(function(x) { return mc.ll.addInv(x); });
+				temp[i] = mc.ll.one;
 				output.push(temp);
 			}
 		}

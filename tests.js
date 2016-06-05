@@ -67,33 +67,46 @@ function geomTests() {
 			&& pc.eval(cls[0])== -4;
 	});
 	this.tests.push(function() {
+		var c = new CoefLL();
+		return !c.singleEqual(c.zero, c.one);
+	});
+	this.tests.push(function() {
+		var c = new CoefLL();
+		var p = [0,6,2,43,2];
+		return c.singleEqual(c.singleAdd(p,c.addInv(p)), c.zero);
+	});
+	this.tests.push(function() {
 		var pc = new PolyCalc();
-		var mc = new MtxCalc();
+		var c = new CoefLL();
 		var p1 = [1,0,-1];
 		var p2 = [-1,1];
 		var obj = pc.coefDivide(p1,p2);
-		return mc.vectEqual([],obj.r);
+		return c.singleEqual(c.zero,obj.r);
 	});
 	this.tests.push(function() {
 		var pc = new PolyCalc();
-		var mc = new MtxCalc();
-		return mc.vectEqual(pc.coefMult([2,1],[1,1]), [2,3,1]);
+		var c = new CoefLL();
+		return c.singleEqual(c.singleMult([2,1],[1,1]), [2,3,1,0,0]);
 	});
 	this.tests.push(function() {
 		var pc = new PolyCalc();
-		var mc = new MtxCalc();
-		return mc.vectEqual(pc.coefMult([-2,1],[2,3,1]), [-4,-4,1,1]);
+		var c = new CoefLL();
+		return c.singleEqual(c.singleMult([-2,1,0,0],[2,3,1]), [-4,-4,1,1]);
 	});
 	this.tests.push(function() {
 		var pc = new PolyCalc();
-		var mc = new MtxCalc();
+		var c = new CoefLL();
+		return c.singleEqual(c.singleAdd([-2,1],[2,3,1]), [0,4,1]);
+	});
+	this.tests.push(function() {
+		var pc = new PolyCalc();
 		return pc.rat(-1.44444444444444).n == -13;
 	});
 	this.tests.push(function() {
 		var pc = new PolyCalc();
-		var mc = new MtxCalc();
 		var roots = pc.rationalRoots([2,3,1]);
-		return mc.vectEqual(pc.coefMult(roots[0],roots[1]), [2,3,1]);
+		var c = new CoefLL();
+		return c.singleEqual(c.singleMult(roots[0],roots[1]), [2,3,1]);
 	});
 	this.tests.push(function() {
 		var pc = new PolyCalc();
@@ -154,7 +167,8 @@ function geomTests() {
 	this.tests.push(function() {
 		var pc = new PolyCalc();
 		var mc = new MtxCalc();
-		var p = pc.coefMult(pc.coefMult([-2,0,1],[-5,0,1]),[1,1]);
+		var c = new CoefLL();
+		var p = c.singleMult(c.singleMult([-2,0,1],[-5,0,1]),[1,1]);
 		var fact = pc.factor(p);
 		return mc.vectEqual(fact[0],[-2,0,1])
 			|| mc.vectEqual(fact[1],[-2,0,1])

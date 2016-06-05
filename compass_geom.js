@@ -347,25 +347,66 @@ function ProjectiveCalc() {
 	}
 }
 
+function DefaultLL() {
+	this.zero = 0.0;
+	this.one = 1.0;
+	this.singleAdd = function (a,b) { return a+b; }
+	this.singleMult = function (a,b) { return a*b; }
+	this.singleEqual = function(a,b) { return Math.abs(a-b) < 0.000001; }
+	this.abs = function(x) { return Math.abs(x); }
+	this.order = function(a,b) { return a < b; }
+	this.multInv = function(x) { return 1/x; }
+	this.addInv = function(x) { return -x; }
+}
+
+function CoefLL() {
+	this.ll = new DefaultLL();
+	this.zero = [this.ll.zero];
+	this.one = [this.ll.one];
+	this.singleAdd = function (a,b) {
+		var output = [];
+		for (var i = 0; i < a.length || i < b.length; i++) {
+			output.push(this.ll.singleAdd(
+				i < a.length ? a[i] : this.ll.zero,
+				i < b.length ? b[i] : this.ll.zero
+			));
+		}
+		return output;
+	}
+	this.singleMult = function (lhs,rhs) {
+		var output = [];
+		for (var i = 0; i < lhs.length+rhs.length-1; i++) {
+			output.push(0);
+		}
+		for (var i = 0; i < lhs.length; i++) {
+			for (var j = 0; j < rhs.length; j++) {
+				output[i+j] = this.ll.singleAdd(output[i+j], this.ll.singleMult(lhs[i], rhs[j]));
+			}
+		}
+		return output;
+	}
+	this.singleEqual = function(a,b) {
+		for (var i = 0; i < a.length || i < b.length; i++) {
+			if (i >= a.length && !this.ll.singleEqual(this.ll.zero, b[i])) {
+				return false;
+			}
+			else if (i >= b.length && !this.ll.singleEqual(this.ll.zero, a[i])) {
+				return false;
+			}
+			else if (i < a.length && i < b.length && !this.ll.singleEqual(b[i], a[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+	this.abs = function(x) { return x.length > 0 ? this.ll.abs(x[0]) : this.ll.abs(this.ll.zero); }
+	this.order = function(a,b) { return a < b; }
+	this.multInv = function(x) { throw("No multiplicative inverses for polynomials: " + JSON.stringify(x)); }
+	this.addInv = function(x) { var ll = this.ll; return x.map(function(y) {return ll.addInv(y); }); }
+}
+
 function MtxCalc() {
-	this.ll = {};
-	/************************
-	* Start number specific
-	************************/
-
-	this.ll.zero = 0.0;
-	this.ll.one = 1.0;
-	this.ll.singleAdd = function (a,b) { return a+b; }
-	this.ll.singleMult = function (a,b) { return a*b; }
-	this.ll.singleEqual = function(a,b) { return Math.abs(a-b) < 0.000001; }
-	this.ll.abs = function(x) { return Math.abs(x); }
-	this.ll.order = function(a,b) { return a < b; }
-	this.ll.multInv = function(x) { return 1/x; }
-	this.ll.addInv = function(x) { return -x; }
-
-	/************************
-	* End number specific
-	************************/
+	this.ll = new DefaultLL();
 
 	this.vectEqual = function(a,b) {
 		var mc = this;
@@ -779,22 +820,6 @@ function PolyCalc() {
 			output.r.pop();
 		}
 
-		return output;
-	}
-
-	this.coefMult = function(lhs,rhs) {
-		var output = [];
-		for (var i = 0; i < lhs.length+rhs.length-1; i++) {
-			output.push(0);
-		}
-		for (var i = 0; i < lhs.length; i++) {
-			for (var j = 0; j < rhs.length; j++) {
-				output[i+j] += lhs[i] * rhs[j];
-			}
-		}
-/*		console.log(JSON.stringify(lhs) + "*" +
-		JSON.stringify(rhs) + " = " +
-		JSON.stringify(output));*/
 		return output;
 	}
 

@@ -141,7 +141,7 @@ function geomTests() {
 		var pc = new PolyCalc();
 		return pc.gcd(-1,3) == 1 && pc.gcd(0,3) == 3;
 	});
-	this.tests.push(function() {
+/*	this.tests.push(function() {
 		var pc = new PolyCalc();
 		var mc = new MtxCalc();
 		var mtx = [[1,2,3],[4,5,6],[7,8,9]];
@@ -152,7 +152,7 @@ function geomTests() {
                 }
 		var ch = pc.coefNormalize(pc.classifyTerms(mc.detPoly(temp), "x"));
 		return mc.vectEqual(ch, [0,-18,-15,1]);
-	});
+	}); */
 	this.tests.push(function() {
 		var pc = new PolyCalc();
 		var mc = new MtxCalc();
@@ -433,8 +433,11 @@ function geomTests() {
 	});
 	this.tests.push(function() {
 		var mc = new MtxCalc();
+		var pc = new PolyCalc();
 		var mtx1 = [[1,0,0],[0,1,0],[0,0,1]];
-		return mc.vectEqual(mc.characteristic(mtx1),[-1,3,-3,1]);
+		var chr = mc.characteristic(mtx1);
+		var norm = pc.coefNormalize(chr.map(function (x) { return [{"n":[x], "d":[1]}];}));
+		return mc.vectEqual(norm,[-1,3,-3,1]);
 	});
 	this.tests.push(function() {
 		var mc = new MtxCalc();

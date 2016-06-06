@@ -359,8 +359,8 @@ function DefaultLL() {
 	this.addInv = function(x) { return -x; }
 }
 
-function CoefLL() {
-	this.ll = new DefaultLL();
+function CoefLL(low) {
+	this.ll = !low ? new DefaultLL() : low;
 	this.zero = [this.ll.zero];
 	this.one = [this.ll.one];
 	this.singleAdd = function (a,b) {
@@ -405,8 +405,8 @@ function CoefLL() {
 	this.addInv = function(x) { var ll = this.ll; return x.map(function(y) {return ll.addInv(y); }); }
 }
 
-function MtxCalc() {
-	this.ll = new DefaultLL();
+function MtxCalc(low) {
+	this.ll = !low ? new DefaultLL() : low;
 
 	this.vectEqual = function(a,b) {
 		var mc = this;
@@ -603,41 +603,39 @@ function MtxCalc() {
 		});
 	}
 
-	this.det = function(mtx) {
-		var pc = new PolyCalc();
-		var output = this.detPoly(this.mtxToPoly(mtx));
-		return pc.eval(output);
-	}
-
 	// this is the determinant by cofactor expansion.
-	// to complicate matters further, it assumes
-	// matrix entries are polynomials rather than numbers
-	this.detPoly = function(mtx) {
-		var pc = new PolyCalc();
-		var accum = pc.num(0);
+	this.det = function(mtx) {
+		var accum = this.ll.zero;
+		var parity;
 		if (!mtx || mtx.length != this.cols(mtx)) {
 			throw("Must be square matrix.");
 		}
 		if (mtx.length == 1) { return mtx[0][0]; }
 		else if (mtx.length == 2) {
-			return pc.add(pc.mult(mtx[0][0],mtx[1][1]), pc.mult(pc.num(-1),pc.mult(mtx[0][1],mtx[1][0])));
+			return this.ll.singleAdd(this.ll.singleMult(mtx[0][0],mtx[1][1]), this.ll.singleMult(this.ll.addInv(this.ll.one),this.ll.singleMult(mtx[0][1],mtx[1][0])));
 		}
 
 		for (var i = 0; i < mtx.length; i++) {
-			accum = pc.add(accum,pc.mult(pc.num(i%2==0 ? 1 : -1),pc.mult(mtx[0][i],this.detPoly(this.submatrix(mtx,0,i)))));
+			parity = i%2==0 ? this.ll.one : this.ll.addInv(this.ll.one);
+			accum = this.ll.singleAdd(accum,this.ll.singleMult(parity, this.ll.singleMult(mtx[0][i],this.det(this.submatrix(mtx,0,i)))));
 		}
 
 		return accum;
 	}
 
 	this.characteristic = function(mtx) {
-		var pc = new PolyCalc();
-		var minusx = pc.mult(pc.num(-1),pc.num("x"));
-		var temp = this.mtxToPoly(mtx);
+		var minusone = this.ll.addInv(this.ll.one);
+		var newll = new CoefLL(this.ll);
+		var newmc = new MtxCalc(newll);
+		var temp = mtx.map(function (x) {
+			return x.map(function(y) {
+				return [y];
+			});
+		});
 		for (var i = 0; i < mtx.length; i++) {
-			temp[i][i] = pc.add(temp[i][i], minusx);
+			temp[i][i].push(minusone);
 		}
-		return pc.coefNormalize(pc.classifyTerms(this.detPoly(temp), "x"));
+		return newmc.det(temp);
 	}
 
 	this.isZeroVect = function(input) {
@@ -664,6 +662,7 @@ function MtxCalc() {
 	}
 
 	this.eigenValues = function(input) {
+		var mc = this;
 		if (input.length != this.cols(input)) {
 			throw(JSON.stringify(input) + " is not a square matrix.");
 		}
@@ -675,7 +674,7 @@ function MtxCalc() {
 			if (!x || x.length != 2 || isNaN(x[0])) {
 				throw("failed to factor: " + JSON.stringify(x));
 			}
-			return -x[0]/x[1];
+			return mc.ll.singleMult(mc.ll.addInv(x[0]),mc.ll.multInv(x[1]));
 		});
 		return roots;
 	}
@@ -683,7 +682,7 @@ function MtxCalc() {
 	// discovered eigenvalues as argument
 	this.eigenVectors = function(input, ev) {
 		var size = input.length;
-		var mtx2 = this.mtxAdd(input, this.scaleMtx(-ev, this.makeId(size)));
+		var mtx2 = this.mtxAdd(input, this.scaleMtx(this.ll.addInv(ev), this.makeId(size)));
 		return this.kernelSpace(mtx2);
 	}
 }

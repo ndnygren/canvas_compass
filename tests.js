@@ -471,4 +471,25 @@ function geomTests() {
 		var ev = mc.eigenVectors(mtx,13);
 		return mc.vectEqual(mc.mtxVectMult(mtx,ev[0]),mc.scaleVect(13, ev[0]));
 	});
+	this.tests.push(function() {
+		var cl = new ComplexLL();
+		var x= {"r":1,"c":2};
+		return cl.singleEqual(cl.singleAdd(x,cl.addInv(x)),cl.zero);
+	});
+	this.tests.push(function() {
+		var cl = new ComplexLL();
+		return cl.singleEqual({"r":1,"c":2},{"r":1,"c":2})
+			&& !cl.singleEqual({"r":1,"c":2},{"r":1,"c":-2})
+			&& !cl.singleEqual({"r":1,"c":2},{"r":-1,"c":2});
+	});
+	this.tests.push(function() {
+		var cl = new ComplexLL();
+		return cl.singleEqual(cl.singleMult({"r":0,"c":2},{"r":0,"c":14}),{"r":-28,"c":0})
+			&& cl.singleEqual(cl.singleMult({"r":0,"c":2},{"r":7,"c":0}),{"r":0,"c":14});
+	});
+	this.tests.push(function() {
+		var cl = new ComplexLL();
+		var x= {"r":5,"c":2};
+		return cl.singleEqual(cl.singleMult(x,cl.multInv(x)),cl.one);
+	});
 }

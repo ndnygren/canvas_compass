@@ -400,9 +400,28 @@ function CoefLL(low) {
 		return true;
 	}
 	this.abs = function(x) { return x.length > 0 ? this.ll.abs(x[0]) : this.ll.abs(this.ll.zero); }
-	this.order = function(a,b) { return a < b; }
+	this.order = function(a,b) { return this.ll.order(a.length, b.length); }
 	this.multInv = function(x) { throw("No multiplicative inverses for polynomials: " + JSON.stringify(x)); }
 	this.addInv = function(x) { var ll = this.ll; return x.map(function(y) {return ll.addInv(y); }); }
+}
+
+function ComplexLL(low) {
+	this.ll = !low ? new DefaultLL() : low;
+	this.zero = {"r":this.ll.zero, "c":this.ll.zero};
+	this.one = {"r":this.ll.one, "c":this.ll.zero};
+	this.singleAdd = function (a,b) { return {"r":this.ll.singleAdd(a.r,b.r), "c":this.ll.singleAdd(a.c,b.c)}; }
+	this.singleMult = function (a,b) { return {"r": this.ll.singleAdd(this.ll.singleMult(a.r,b.r), this.ll.addInv(this.ll.singleMult(a.c,b.c))),
+		"c": this.ll.singleAdd(this.ll.singleMult(a.c,b.r), this.ll.singleMult(a.r,b.c))  }; }
+	this.singleEqual = function(a,b) { return  this.ll.singleEqual(a.r,b.r) && this.ll.singleEqual(a.c, b.c); }
+	this.abs = function(x) { return this.ll.abs(x.r) + this.ll.abs(x.c); }
+	// no proper order for this
+	this.order = function(a,b) { return this.ll.order(a.r, b.r); }
+	this.multInv = function(x) {
+		var denom = this.ll.singleAdd(this.ll.singleMult(x.r,x.r),this.ll.singleMult(x.c,x.c));
+		denom = this.ll.multInv(denom);
+		return {"r": this.ll.singleMult(x.r,denom), "c": this.ll.singleMult(this.ll.addInv(x.c),denom)};
+	}
+	this.addInv = function(x) { return {"r":this.ll.addInv(x.r), "c":this.ll.addInv(x.c)}; }
 }
 
 function MtxCalc(low) {
@@ -678,7 +697,7 @@ function MtxCalc(low) {
 		});
 		return roots;
 	}
-	// takes a matrix and one of the preivously
+	// takes a matrix and one of the previously
 	// discovered eigenvalues as argument
 	this.eigenVectors = function(input, ev) {
 		var size = input.length;

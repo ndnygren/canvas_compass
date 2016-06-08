@@ -357,6 +357,7 @@ function DefaultLL() {
 	this.order = function(a,b) { return a < b; }
 	this.multInv = function(x) { return 1/x; }
 	this.addInv = function(x) { return -x; }
+	this.num = function(x) { return x; }
 }
 
 function CoefLL(low) {
@@ -423,6 +424,22 @@ function ComplexLL(low) {
 	}
 	this.addInv = function(x) { return {"r":this.ll.addInv(x.r), "c":this.ll.addInv(x.c)}; }
 }
+
+function FracLL(low) {
+	this.ll = !low ? new DefaultLL() : low;
+	this.zero = {"n": this.ll.zero, "d":this.ll.one};
+	this.one = {"n": this.ll.one, "d":this.ll.one};
+	this.singleAdd = function (a,b) {
+		return {"n": this.ll.singleAdd(this.ll.singleMult(a.n,b.d),this.ll.singleMult(b.n,a.d)), "d": this.ll.singleMult(a.d,b.d) };
+	}
+	this.singleMult = function (a,b) { return {"n":this.ll.singleMult(a.n,b.n), "d":this.ll.singleMult(a.d,b.d)}; }
+	this.singleEqual = function(a,b) { return this.ll.singleEqual(this.ll.singleMult(a.n,b.d), this.ll.singleMult(b.n,a.d)); }
+	this.abs = function(x) { return this.ll.abs(x.n)/this.ll.abs(x.d); }
+	this.order = function(a,b) { return this.ll.order(this.ll.singleMult(a.n,b.d), this.ll.singleMult(b.n,a.d)); }
+	this.multInv = function(x) { return {"n": x.d, "d": x.n}; }
+	this.addInv = function(x) { return {"n": this.ll.addInv(x.n),"d": x.d}; }
+}
+
 
 function MtxCalc(low) {
 	this.ll = !low ? new DefaultLL() : low;

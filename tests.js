@@ -492,4 +492,17 @@ function geomTests() {
 		var x= {"r":5,"c":2};
 		return cl.singleEqual(cl.singleMult(x,cl.multInv(x)),cl.one);
 	});
+	this.tests.push(function() {
+		var fl = new FracLL();
+		var x = {"n": 5, "d": 7};
+		return fl.singleEqual({"n": 5, "d": 7},x)
+			&& !fl.singleEqual({"n": 5, "d": 6},x)
+			&& !fl.singleEqual({"n": 5, "d": 8},x);
+	});
+	this.tests.push(function() {
+		var fl = new FracLL();
+		var x = {"n": 5, "d": 7};
+		return fl.singleEqual(fl.singleMult(x,fl.multInv(x)),fl.one)
+			&& fl.singleEqual(fl.singleAdd(x,fl.addInv(x)),fl.zero);
+	});
 }

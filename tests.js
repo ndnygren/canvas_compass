@@ -24,47 +24,37 @@ function geomTests() {
 	// start polynomial tests
 	this.tests.push(function() {
 		var pc = new PolyCalc();
-		var temp = [1,2,3,5];
-		return pc.reduceArr(temp)[0] == 30;
+		return pc.isConst([6]);
 	});
 	this.tests.push(function() {
 		var pc = new PolyCalc();
-		var temp = [1,2,"x",3,5];
-		return pc.reduceArr(temp)[1] == 30 && pc.reduceArr(temp)[0] == "x";
+		return !pc.isConst([0,1]);
 	});
 	this.tests.push(function() {
-		var pc = new PolyCalc();
-		return pc.isConst(pc.num(6)[0]);
+		var cll = new CoefLL();
+		var num1 = [1], num2 = [2];
+		return cll.singleEqual(cll.singleAdd(num1, num2), [1+2]);
 	});
 	this.tests.push(function() {
-		var pc = new PolyCalc();
-		return !pc.isConst(pc.num("x")[0]);
-	});
-	this.tests.push(function() {
-		var pc = new PolyCalc();
-		var num1 = pc.num(1), num2 = pc.num(2);
-		return pc.eval(pc.add(num1, num2), 0) == (1+2);
-	});
-	this.tests.push(function() {
-		var pc = new PolyCalc();
-		var num3 = pc.num(3), num4 = pc.num(4);
-		return pc.eval(pc.add(num3, num4), 0) == (3+4);
+		var cll = new CoefLL();
+		var num3 = [3], num4 = [4];
+		return cll.singleEqual(cll.singleAdd(num3, num4), [3+4]);
 	});
 
 	this.tests.push(function() {
-		var pc = new PolyCalc();
-		var num1 = pc.num(1), num2 = pc.num(2), num3 = pc.num(3), num4 = pc.num(4);
-		return pc.eval(pc.mult(pc.add(num1, num2), pc.add(num3, num4)), 0) == (1+2)*(3+4);
+		var pc = new CoefLL();
+		var num1 = [1], num2 = [2], num3 = [3], num4 = [4];
+		return pc.singleEqual(pc.singleMult(pc.singleAdd(num1, num2), pc.singleAdd(num3, num4)), [(1+2)*(3+4)]);
 	});
 	this.tests.push(function() {
-		var pc = new PolyCalc();
-		var t1 = pc.add(pc.num(2), pc.num("x"));
-		var t2 = pc.add(pc.num(-2), pc.num("x"));
-		var t3 = pc.mult(t1,t2);
-		var cls = pc.classifyTerms(t3,"x");
-		return pc.eval(cls[2])== 1
-			&& pc.eval(cls[1])== 0
-			&& pc.eval(cls[0])== -4;
+		var pc = new CoefLL();
+		var t1 = pc.singleAdd([2], [0,1]);
+		var t2 = pc.singleAdd([-2], [0,1]);
+		var t3 = pc.singleMult(t1,t2);
+		var cls = t3;
+		return cls[2] == 1
+			&& cls[1] == 0
+			&& cls[0] == -4;
 	});
 	this.tests.push(function() {
 		var c = new CoefLL();
@@ -141,28 +131,15 @@ function geomTests() {
 		var pc = new PolyCalc();
 		return pc.gcd(-1,3) == 1 && pc.gcd(0,3) == 3;
 	});
-/*	this.tests.push(function() {
-		var pc = new PolyCalc();
-		var mc = new MtxCalc();
-		var mtx = [[1,2,3],[4,5,6],[7,8,9]];
-                var minusx = pc.mult(pc.num(-1),pc.num("x"));
-                var temp = mc.mtxToPoly(mtx);
-                for (var i = 0; i < mtx.length; i++) {
-                        temp[i][i] = pc.add(temp[i][i], minusx);
-                }
-		var ch = pc.coefNormalize(pc.classifyTerms(mc.detPoly(temp), "x"));
-		return mc.vectEqual(ch, [0,-18,-15,1]);
-	}); */
 	this.tests.push(function() {
+		var cll = new CoefLL();
 		var pc = new PolyCalc();
-		var mc = new MtxCalc();
-		var x = pc.num("x");
-		var fact = pc.add(pc.mult(pc.num(2),x), pc.num(-1));
-		var p = pc.mult(fact,fact);
-		var coef = pc.coefNormalize(pc.classifyTerms(p, "x"));
+		var x = [0,1];
+		var fact = cll.singleAdd(cll.singleMult([2],x), [-1]);
+		var coef = cll.singleMult(fact,fact);
 		var refact = pc.factor(coef);
 		return refact.length == 2 && refact[0].length == 2
-			&& mc.vectEqual(refact[0],[-1,2]);
+			&& cll.singleEqual(refact[0],[-1,2]);
 	});
 	this.tests.push(function() {
 		var pc = new PolyCalc();

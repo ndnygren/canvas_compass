@@ -404,6 +404,7 @@ function CoefLL(low) {
 	this.order = function(a,b) { return this.ll.order(a.length, b.length); }
 	this.multInv = function(x) { throw("No multiplicative inverses for polynomials: " + JSON.stringify(x)); }
 	this.addInv = function(x) { var ll = this.ll; return x.map(function(y) {return ll.addInv(y); }); }
+	this.num = function(x) { return [this.ll.num(x)]; }
 }
 
 function ComplexLL(low) {
@@ -423,6 +424,7 @@ function ComplexLL(low) {
 		return {"r": this.ll.singleMult(x.r,denom), "c": this.ll.singleMult(this.ll.addInv(x.c),denom)};
 	}
 	this.addInv = function(x) { return {"r":this.ll.addInv(x.r), "c":this.ll.addInv(x.c)}; }
+	this.num = function(x) { return {"r":this.ll.num(x), "c":this.ll.zero}; }
 }
 
 function FracLL(low) {
@@ -438,8 +440,68 @@ function FracLL(low) {
 	this.order = function(a,b) { return this.ll.order(this.ll.singleMult(a.n,b.d), this.ll.singleMult(b.n,a.d)); }
 	this.multInv = function(x) { return {"n": x.d, "d": x.n}; }
 	this.addInv = function(x) { return {"n": this.ll.addInv(x.n),"d": x.d}; }
+	this.num = function(x) {
+		var pc = new PolyCalc();
+		var temp = pc.rat(x);
+		return {"n":this.ll.num(temp.n),"d":this.ll.num(temp.d)};
+	}
 }
 
+function LLTNode(input, type) {
+	this.name = input;
+	this.type = type;
+	this.child = [];
+
+	this.equalTo = function(rhs, ll) {
+		if (this.type != "num" && this.name != rhs.name) { return false; }
+		if (this.type == "num" && !ll.singleEqual(this.name,rhs.name))
+		if (this.child.length != rhs.child.length) { return false; }
+		if (this.child.length == 0) { return true; }
+		return assocFoldr(zippr(this.child, rhs.child, function(a,b) {
+			return a.equalTo(b, ll);
+		}), function (a,b) { return a && b; } );
+	}
+
+	//deep copy the tree
+	this.copy = function() {
+		var output = new CTNode(this.name,this.type);
+		output.child = this.child.map(function(x) {return x.copy(); });
+		return output;
+	}
+}
+
+function TreeLL(low) {
+	this.ll = !low ? new DefaultLL() : low;
+	this.zero = new LLTNode(this.ll.zero, "num");
+	this.one = new LLTNode(this.ll.one, "num");
+	this.singleAdd = function (a,b) {
+		var output = new LLTNode("add", "func");
+		output.child.push(a.copy());
+		output.child.push(b.copy());
+		return output;
+	}
+	this.singleMult = function (a,b) {
+		var output = new LLTNode("mult", "func");
+		output.child.push(a.copy());
+		output.child.push(b.copy());
+		return output;
+	}
+	this.singleEqual = function(a,b) { return a.equalTo(b,this.ll); }
+	this.abs = function(x) { throw("no abs for trees yet"); }
+	this.order = function(a,b) { throw("no order for trees yet"); }
+	this.multInv = function(x) {
+		var output = new LLTNode("frac", "func");
+		output.child.push(this.one.copy());
+		output.child.push(x.copy());
+		return output;
+	}
+	this.addInv = function(x) {
+		var temp = new LLTNode("neg", "func");
+		temp.child.push(x.copy());
+		return temp;
+	}
+	this.num = function(x) { return new LLTNode(x, "num"); }
+}
 
 function MtxCalc(low) {
 	this.ll = !low ? new DefaultLL() : low;

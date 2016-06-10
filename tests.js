@@ -43,8 +43,8 @@ function geomTests() {
 
 	this.tests.push(function() {
 		var pc = new CoefLL();
-		var num1 = [1], num2 = [2], num3 = [3], num4 = [4];
-		return pc.singleEqual(pc.singleMult(pc.singleAdd(num1, num2), pc.singleAdd(num3, num4)), [(1+2)*(3+4)]);
+		var num1 = [1], num2 = pc.num(2), num3 = pc.num(3), num4 = [4];
+		return pc.singleEqual(pc.singleMult(pc.singleAdd(num1, num2), pc.singleAdd(num3, num4)), pc.num((1+2)*(3+4)));
 	});
 	this.tests.push(function() {
 		var pc = new CoefLL();
@@ -135,7 +135,7 @@ function geomTests() {
 		var cll = new CoefLL();
 		var pc = new PolyCalc();
 		var x = [0,1];
-		var fact = cll.singleAdd(cll.singleMult([2],x), [-1]);
+		var fact = cll.singleAdd(cll.singleMult([2],x), cll.num(-1));
 		var coef = cll.singleMult(fact,fact);
 		var refact = pc.factor(coef);
 		return refact.length == 2 && refact[0].length == 2
@@ -461,7 +461,7 @@ function geomTests() {
 	});
 	this.tests.push(function() {
 		var cl = new ComplexLL();
-		return cl.singleEqual(cl.singleMult({"r":0,"c":2},{"r":0,"c":14}),{"r":-28,"c":0})
+		return cl.singleEqual(cl.singleMult({"r":0,"c":2},{"r":0,"c":14}),cl.num(-28))
 			&& cl.singleEqual(cl.singleMult({"r":0,"c":2},{"r":7,"c":0}),{"r":0,"c":14});
 	});
 	this.tests.push(function() {
@@ -474,6 +474,8 @@ function geomTests() {
 		var x = {"n": 5, "d": 7};
 		return fl.singleEqual({"n": 5, "d": 7},x)
 			&& !fl.singleEqual({"n": 5, "d": 6},x)
+			&& fl.singleEqual(fl.num(1),fl.one)
+			&& fl.singleEqual(fl.num(0),fl.zero)
 			&& !fl.singleEqual({"n": 5, "d": 8},x);
 	});
 	this.tests.push(function() {
@@ -481,5 +483,9 @@ function geomTests() {
 		var x = {"n": 5, "d": 7};
 		return fl.singleEqual(fl.singleMult(x,fl.multInv(x)),fl.one)
 			&& fl.singleEqual(fl.singleAdd(x,fl.addInv(x)),fl.zero);
+	});
+	this.tests.push(function() {
+		var fl = new FracLL();
+		return fl.singleEqual(fl.singleMult(fl.num(0.33333333333),fl.num(0.666666666666)),fl.num(0.2222222222222));
 	});
 }

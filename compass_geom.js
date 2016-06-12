@@ -465,7 +465,7 @@ function LLTNode(input, type) {
 
 	//deep copy the tree
 	this.copy = function() {
-		var output = new CTNode(this.name,this.type);
+		var output = new LLTNode(this.name,this.type);
 		output.child = this.child.map(function(x) {return x.copy(); });
 		return output;
 	}
@@ -480,14 +480,25 @@ function TreeLL(low) {
 			return new LLTNode(this.ll.singleAdd(a.name,b.name), "num");
 		}
 		var output = new LLTNode("add", "func");
-		output.child.push(a.copy());
-		output.child.push(b.copy());
+		if (a.type=="func" && a.name=="add") {
+			output.child = output.child.concat(a.copy().child);
+		} else { output.child.push(a.copy()); }
+		if (b.type=="func" && b.name=="add") {
+			output.child = output.child.concat(b.copy().child);
+		} else { output.child.push(b.copy()); }
 		return output;
 	}
 	this.singleMult = function (a,b) {
 		var output = new LLTNode("mult", "func");
-		output.child.push(a.copy());
-		output.child.push(b.copy());
+		if (a.type == "num" && b.type == "num") {
+			return new LLTNode(this.ll.singleMult(a.name,b.name), "num");
+		}
+		if (a.type=="func" && a.name=="mult") {
+			output.child = output.child.concat(a.copy().child);
+		} else { output.child.push(a.copy()); }
+		if (b.type=="func" && b.name=="mult") {
+			output.child = output.child.concat(b.copy().child);
+		} else { output.child.push(b.copy()); }
 		return output;
 	}
 	this.singleEqual = function(a,b) { return a.equalTo(b,this.ll); }

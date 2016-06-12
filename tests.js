@@ -501,4 +501,31 @@ function geomTests() {
 		var tl = new TreeLL();
 		return tl.singleEqual(tl.singleAdd(tl.num(5),tl.num(-7)),tl.num(-2));
 	});
+	this.tests.push(function() {
+		var tl = new TreeLL();
+		return tl.singleEqual(tl.singleMult(tl.num(5),tl.num(-7)),tl.num(-35));
+	});
+	this.tests.push(function() {
+		var tl = new TreeLL();
+		var n2 = tl.num(2), n3 = tl.num(3);
+		var x = new LLTNode("x","var");
+		return tl.singleEqual(
+			tl.singleAdd(n2,tl.singleAdd(x,n3)),
+			tl.singleAdd(n2,tl.singleAdd(x,n3)))
+			&& !tl.singleEqual(
+			tl.singleAdd(n2,tl.singleAdd(x,n3)),
+			tl.singleAdd(n2,tl.singleAdd(x,n2)))
+			&& tl.singleEqual(
+			tl.singleAdd(n2,tl.singleAdd(x,n3)),
+			tl.singleAdd(tl.singleAdd(n2,x),n3))
+			&& tl.singleEqual(
+			tl.singleMult(n2,tl.singleMult(x,n3)),
+			tl.singleMult(n2,tl.singleMult(x,n3)))
+			&& !tl.singleEqual(
+			tl.singleMult(n2,tl.singleMult(x,n3)),
+			tl.singleMult(n2,tl.singleMult(x,n2)))
+			&& tl.singleEqual(
+			tl.singleMult(n2,tl.singleMult(x,n3)),
+			tl.singleMult(tl.singleMult(n2,x),n3));
+	});
 }

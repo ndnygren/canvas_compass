@@ -488,4 +488,17 @@ function geomTests() {
 		var fl = new FracLL();
 		return fl.singleEqual(fl.singleMult(fl.num(0.33333333333),fl.num(0.666666666666)),fl.num(0.2222222222222));
 	});
+	this.tests.push(function() {
+		var tl = new TreeLL();
+		var n1 = tl.num(1);
+		var n0 = tl.num(0);
+		return tl.singleEqual(n1,n1)
+			&& !tl.singleEqual(n1,n0)
+			&& tl.singleEqual(n0,tl.zero)
+			&& tl.singleEqual(n1,tl.one);
+	});
+	this.tests.push(function() {
+		var tl = new TreeLL();
+		return tl.singleEqual(tl.singleAdd(tl.num(5),tl.num(-7)),tl.num(-2));
+	});
 }

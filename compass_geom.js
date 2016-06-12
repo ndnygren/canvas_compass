@@ -453,8 +453,9 @@ function LLTNode(input, type) {
 	this.child = [];
 
 	this.equalTo = function(rhs, ll) {
+		if (this.type != rhs.type) {return false;}
 		if (this.type != "num" && this.name != rhs.name) { return false; }
-		if (this.type == "num" && !ll.singleEqual(this.name,rhs.name))
+		if (this.type == "num") { return ll.singleEqual(this.name,rhs.name); }
 		if (this.child.length != rhs.child.length) { return false; }
 		if (this.child.length == 0) { return true; }
 		return assocFoldr(zippr(this.child, rhs.child, function(a,b) {
@@ -475,6 +476,9 @@ function TreeLL(low) {
 	this.zero = new LLTNode(this.ll.zero, "num");
 	this.one = new LLTNode(this.ll.one, "num");
 	this.singleAdd = function (a,b) {
+		if (a.type == "num" && b.type == "num") {
+			return new LLTNode(this.ll.singleAdd(a.name,b.name), "num");
+		}
 		var output = new LLTNode("add", "func");
 		output.child.push(a.copy());
 		output.child.push(b.copy());

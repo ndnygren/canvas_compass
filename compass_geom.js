@@ -480,26 +480,21 @@ function TreeLL(low) {
 			return new LLTNode(this.ll.singleAdd(a.name,b.name), "num");
 		}
 		var output = new LLTNode("add", "func");
-		if (a.type=="func" && a.name=="add") {
-			output.child = output.child.concat(a.copy().child);
-		} else { output.child.push(a.copy()); }
-		if (b.type=="func" && b.name=="add") {
-			output.child = output.child.concat(b.copy().child);
-		} else { output.child.push(b.copy()); }
-		return output;
+		var tc = new TreeCalc();
+		output.child.push(a.copy());
+		output.child.push(b.copy());
+
+		return tc.assocOp(output, "add");
 	}
 	this.singleMult = function (a,b) {
 		var output = new LLTNode("mult", "func");
 		if (a.type == "num" && b.type == "num") {
 			return new LLTNode(this.ll.singleMult(a.name,b.name), "num");
 		}
-		if (a.type=="func" && a.name=="mult") {
-			output.child = output.child.concat(a.copy().child);
-		} else { output.child.push(a.copy()); }
-		if (b.type=="func" && b.name=="mult") {
-			output.child = output.child.concat(b.copy().child);
-		} else { output.child.push(b.copy()); }
-		return output;
+		var tc = new TreeCalc();
+		output.child.push(a.copy());
+		output.child.push(b.copy());
+		return tc.assocOp(output, "mult");
 	}
 	this.singleEqual = function(a,b) { return a.equalTo(b,this.ll); }
 	this.abs = function(x) { throw("no abs for trees yet"); }
@@ -970,4 +965,24 @@ function PolyCalc() {
 	}
 }
 
+function TreeCalc() {
+	this.assocOp = function(tree, opname) {
+		var tc = this;
+		var output = new LLTNode(tree.name, tree.type);
+		var temp;
+
+		output.child = tree.child.map(function (x) {
+			return tc.assocOp(x, opname);
+		});
+
+		if (output.name == opname) {
+			for (var i = output.child.length - 1; i >= 0; i--) {
+				if (output.child[i].name == opname) {
+					output.child = output.child.slice(0,i).concat(output.child[i].child).concat(output.child.slice(i+1));
+				}
+			}
+		}
+		return output;
+	}
+}
 

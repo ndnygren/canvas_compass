@@ -528,4 +528,26 @@ function geomTests() {
 			tl.singleMult(n2,tl.singleMult(x,n3)),
 			tl.singleMult(tl.singleMult(n2,x),n3));
 	});
+	this.tests.push(function() {
+		var tl = new TreeLL();
+		var tc = new TreeCalc();
+		var add = tl.singleAdd;
+		var mult = tl.singleMult;
+		var n2 = tl.num(2), n3 = tl.num(3), n15 = tl.num(15);
+		var x = new LLTNode("x","var");
+		var m2x = mult(n2,x);
+		var m32p2xp3 = mult(n3, add(n2, add(m2x, n3)));
+		m32p2xp3 = tc.commuteOp(m32p2xp3, "add");
+		console.log(JSON.stringify(m32p2xp3));
+		var a15m6x = add(n15, mult(n3,mult(n2,x)));
+		return tl.singleEqual(m32p2xp3,a15m6x);
+	});
+	this.tests.push(function() {
+		return classifyr([], function(x) { return ""; }).length == 0;
+	});
+	this.tests.push(function() {
+		var temp = classifyr([1,2,3,4,5,6,7,8], function(x) { return x%5; });
+		return temp.length == 5;
+	});
 }
+

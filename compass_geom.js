@@ -21,6 +21,23 @@ function zippr(lhs, rhs, func) {
 	return output;
 }
 
+function classifyr(arr, func) {
+	var output = [];
+	var classes = {};
+	for (var i in arr) {
+		if (!classes[func(arr[i])]) {
+			classes[func(arr[i])] = [arr[i]];
+		} else {
+			classes[func(arr[i])].push(arr[i]);
+		}
+	}
+	for (var key in classes) {
+		output.push(classes[key]);
+	}
+
+	return output;
+}
+
 function CTNode(input) {
 	this.name = input.replace(/[ \t]+$/, "").replace(/^[(), \t]+/,"");
 	this.child = [];
@@ -982,6 +999,36 @@ function TreeCalc() {
 				}
 			}
 		}
+		return output;
+	}
+
+	this.commuteOp = function(tree, opname) {
+		var output = tree.copy();
+		var tc = this;
+		var temp = [];
+		output.child = output.child.map(function (x) {
+			return tc.commuteOp(x, opname);
+		});
+
+		if (output.name == opname) {
+			temp = classifyr(output.child, function(x) {return x.type;});
+			output.child = [];
+			for (var i in temp) {
+				output.child = output.child.concat(temp[i]);
+			}
+		}
+
+		return output;
+	}
+
+	this.reduce = function(x, ll) {
+		var output = tree.copy();
+		var tc = this;
+		var temp = [];
+		output.child = output.child.map(function (x) {
+			return tc.reduce(x, ll);
+		});
+
 		return output;
 	}
 }

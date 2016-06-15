@@ -537,7 +537,7 @@ function geomTests() {
 		var x = new LLTNode("x","var");
 		var m2x = mult(n2,x);
 		var m32p2xp3 = mult(n3, add(n2, add(m2x, n3)));
-		m32p2xp3 = tc.commuteOp(m32p2xp3, "add");
+		m32p2xp3 = tc.reduce(tc.commuteOp(m32p2xp3, "add"), new DefaultLL());
 		console.log(JSON.stringify(m32p2xp3));
 		var a15m6x = add(n15, mult(n3,mult(n2,x)));
 		return tl.singleEqual(m32p2xp3,a15m6x);

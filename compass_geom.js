@@ -1021,13 +1021,31 @@ function TreeCalc() {
 		return output;
 	}
 
-	this.reduce = function(x, ll) {
+	this.reduce = function(tree, ll) {
 		var output = tree.copy();
 		var tc = this;
+		var tl = new TreeLL(ll);
 		var temp = [];
+		var classes, ops = {};
 		output.child = output.child.map(function (x) {
 			return tc.reduce(x, ll);
 		});
+
+		ops["add"] = function(a,b) {return tl.singleAdd(a,b);}
+		ops["mult"] = function(a,b) { return tl.singleMult(a,b);}
+
+		if (tree.type == "func") {
+			classes = classifyr(output.child, function(x) { return x.type; });
+			output.child = [];
+			for (var i in classes) {
+				if (classes[i][0].type == "num") {
+					temp = [assocFoldr(classes[i], ops[tree.name])];
+				} else {
+					temp = classes[i];
+				}
+				output.child = output.child.concat(temp);
+			}
+		}
 
 		return output;
 	}

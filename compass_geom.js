@@ -1021,6 +1021,60 @@ function TreeCalc() {
 		return output;
 	}
 
+	this.distrib_help = function(lhs, rhs, multop) {
+		var output = lhs.copy();
+		var temp;
+		lhs.child = [];
+		for (var i = 0; i < lhs.child.length; i++) {
+			for (var j = 0; j < rhs.child.length; j++) {
+				temp = new LLTNode(multop, "func");
+				temp.child.push(lhs.child[i]);
+				temp.child.push(rhs.child[j]);
+				output.push(temp);
+			}
+		}
+
+		return output;
+	}
+
+	this.distributeOps = function(tree, multop, addop) {
+		var output = tree.copy();
+		var tc = this;
+		var classes;
+		var addlist = [];
+		var multlist = [];
+		var temp;
+		output.child = output.child.map(function (x) {
+			return tc.distributeOps(x, multop,addop);
+		});
+
+		if (tree.name == multop && tree.type == "func") {
+			classes = classifyr(output.child, function (x) { return x.name == addop && x.type == "func"});
+			if (classes.length < 2) { return output; }
+			else if (classes[0][0].name != addop) {
+				addlist = classes[1];
+				multlist = classes[0];
+			} else {
+				multlist = classes[1];
+				addlist = classes[0];
+			}
+			while (addlist.length > 1) {
+				temp = addlist[addlist.length-1];
+				addlist.pop();
+				addlist.map(function(x) { return tc.distrib_help(x, temp, multop); });
+			}
+			output = addlist[0];
+			output.child = output.child.map(function (x) {
+				temp = new LLTNode(multop, "func");
+				temp.child = multlist.map(function(x) { return x.copy(); });
+				temp.child.push(x);
+				return temp;
+			});
+		}
+
+		return output;
+	}
+
 	this.reduce = function(tree, ll) {
 		var output = tree.copy();
 		var tc = this;
@@ -1045,6 +1099,7 @@ function TreeCalc() {
 				}
 				output.child = output.child.concat(temp);
 			}
+			if (output.child.length == 1) { return output.child[0]; }
 		}
 
 		return output;

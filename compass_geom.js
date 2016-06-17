@@ -180,6 +180,28 @@ function ConstructParse() {
 		return stack[0];
 	}
 
+	this.tree2DArray = function(input) {
+		var output = {"name":input.name, arr:[]};
+		console.log(JSON.stringify(input.tree.child[0].child));
+		output.arr = input.tree.child[0].child.map(function (row) {
+			console.log("row: " + JSON.stringify(row));
+			return row.child.map(function (col) {
+				console.log("col: " + JSON.stringify(col));
+				return col.name;
+			});
+		});
+
+		return output;
+	}
+
+	this.mtxARead = function(input) {
+		var cp = this;
+		var adapted = input.replace(/\[/g, "list(").replace(/\]/g, ")");
+		return this.assignRead(adapted).map(function (x) {
+			return cp.tree2DArray(x);
+		});
+	}
+
 	this.htmlDebug = function(tree) {
 		var pa = this;
 		var output = "\"" + tree.name + "\"";

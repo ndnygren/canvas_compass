@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+		<meta content="utf-8" http-equiv="encoding">
+		<script type="text/javascript" src="compass_geom.js"></script>
+		<script type="text/javascript" src="tests.js"></script>
+		<title>Matrix Ops</title>
+		<link href="style.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+		<h1>Matrix Ops</h1>
+		<h2>Enter Construction:</h2>
+		<div id="main_content_div" class="outer_div">
+			<div class="inner_div">
+				<textarea id="input_box">
+					m1 = [[3,4],[5,6]];
+				</textarea>
+			</div>
+			<div class="inner_div">
+				<button onclick="loadInput();">Load</button>
+			</div>
+		</div>
+		<div class="outer_div">
+				<div class="inner_div"></div>
+				<div id="output_div" class="inner_div"></div>
+		</div>
+		<div id="test_div" class="outer_div"></div>
+	</body>
+	<script type="text/javascript">
+		function loadInput() {
+			var cp = new ConstructParse();
+			var gt = new geomTests();
+			var pc = new ProjectiveCalc();
+			var input_text = document.getElementById("input_box").value;
+			var assignments = cp.mtxARead(input_text);
+			document.getElementById("output_div").innerHTML = JSON.stringify(assignments);
+			document.getElementById("test_div").innerHTML = gt.runTests();
+			localStorage.setItem("mtx_construction",input_text);
+			return false;
+		}
+		document.getElementById("input_box").value = localStorage.getItem("mtx_construction");
+	</script>
+</html>

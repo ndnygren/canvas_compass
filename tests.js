@@ -449,6 +449,23 @@ function geomTests() {
 		return mc.vectEqual(mc.mtxVectMult(mtx,ev[0]),mc.scaleVect(13, ev[0]));
 	});
 	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var v1 = [0.5, 0.5];
+		var v2 = [0.25, 0.75];
+		var t = [0.125, 0.375, 0.125, 0.375];
+		return mc.vectEqual(t, mc.vectTensor(v1,v2));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var v1 = [1, 0];
+		var v2 = [0.25, 0.75];
+		var t = [0.25, 0.75, 0, 0];
+		return mc.vectEqual(t, mc.vectTensor(v1,v2));
+	});
+
+
+	// low level tests
+	this.tests.push(function() {
 		var cl = new ComplexLL();
 		var x= {"r":1,"c":2};
 		return cl.singleEqual(cl.singleAdd(x,cl.addInv(x)),cl.zero);

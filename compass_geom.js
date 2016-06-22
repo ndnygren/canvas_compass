@@ -182,11 +182,8 @@ function ConstructParse() {
 
 	this.tree2DArray = function(input) {
 		var output = {"name":input.name, arr:[]};
-		console.log(JSON.stringify(input.tree.child[0].child));
 		output.arr = input.tree.child[0].child.map(function (row) {
-			console.log("row: " + JSON.stringify(row));
 			return row.child.map(function (col) {
-				console.log("col: " + JSON.stringify(col));
 				return col.name;
 			});
 		});
@@ -831,6 +828,18 @@ function MtxCalc(low) {
 		var size = input.length;
 		var mtx2 = this.mtxAdd(input, this.scaleMtx(this.ll.addInv(ev), this.makeId(size)));
 		return this.kernelSpace(mtx2);
+	}
+
+	this.vectTensor = function(lhs, rhs) {
+		var output = [];
+		for (var i = 0; i < lhs.length; i++)
+		{
+			for (var j = 0; j < rhs.length; j++)
+			{
+				output.push(this.ll.singleMult(lhs[i], rhs[j]));
+			}
+		}
+		return output;
 	}
 }
 

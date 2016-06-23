@@ -462,6 +462,23 @@ function geomTests() {
 		var t = [0.25, 0.75, 0, 0];
 		return mc.vectEqual(t, mc.vectTensor(v1,v2));
 	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var v1 = [1, 0];
+		var v2 = [0.25, 0.75];
+		var t = [0.25, 0.75, 0, 0];
+		return mc.mtxEqual(mc.makeId(6), mc.mtxTensor(mc.makeId(3),mc.makeId(2)));
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc();
+		var v1 = [2,7,8];
+		var v2 = [3,4];
+		var m1 = [[5,3,7],[3,8,9],[2,2,1]];
+		var m2 = [[8,4],[1,2]];
+		var tenfirst = mc.mtxVectMult(mc.mtxTensor(m1,m2),mc.vectTensor(v1,v2));
+		var partfirst = mc.vectTensor(mc.mtxVectMult(m1,v1),mc.mtxVectMult(m2,v2));
+		return mc.vectEqual(tenfirst,partfirst);
+	});
 
 
 	// low level tests

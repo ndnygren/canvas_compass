@@ -841,6 +841,18 @@ function MtxCalc(low) {
 		}
 		return output;
 	}
+
+	this.mtxTensor = function(lhs, rhs) {
+		var mc = this;
+		var output = lhs.map(function(row) {
+			var arr = row.map(function(col) {
+				return mc.scaleMtx(col,rhs);
+			});
+			return assocFoldr(arr, function(a,b) { return mc.sideBySide(a,b); });
+		});
+		output = assocFoldr(output, function(a,b) {return a.concat(b); });
+		return output;
+	}
 }
 
 function PolyCalc() {

@@ -182,21 +182,46 @@ function ConstructParse() {
 
 	this.tree2DArray = function(input) {
 		var output = {"name":input.name, arr:[]};
-		output.arr = input.tree.child[0].child.map(function (row) {
-			return row.child.map(function (col) {
-				return col.name;
-			});
+		output.arr = input.child.map(function (col) {
+			return col.name;
 		});
 
 		return output;
 	}
 
+	this.isVect = function(input) {
+		return input.name == "list" && input.child.length > 0 && input.child[0].name != "list";
+	}
+
+	this.isMtx = function(input) {
+		return input.name == "list" && input.child.length > 0 && input.child[0].name == "list";
+	}
+
+	this.mtxCollect = function(input, assignments) {
+		var newnode = undefined;
+		var cp = this;
+		if (this.isMtx(input)){
+			newnode = input.child.map(function(x) {
+				return cp.tree2DArray(x).arr;
+			});
+			return newnode;
+		} else if (this.isVect(input)){
+			return cp.tree2DArray(input).arr;
+		}
+		return newnode;
+	}
+
 	this.mtxARead = function(input) {
 		var cp = this;
 		var adapted = input.replace(/\[/g, "list(").replace(/\]/g, ")");
-		return this.assignRead(adapted).map(function (x) {
-			return cp.tree2DArray(x);
+		var assig = {};
+		cp.assignRead(adapted).map(function(x) {
+			var col;
+			col = cp.mtxCollect(x.tree.child[0],assig);
+			assig[x.name] = col;
+			return col;
 		});
+		return assig;
 	}
 
 	this.htmlDebug = function(tree) {

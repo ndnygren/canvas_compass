@@ -200,15 +200,29 @@ function ConstructParse() {
 	this.mtxCollect = function(input, assignments) {
 		var newnode = undefined;
 		var cp = this;
+		var mc = new MtxCalc();
 		if (this.isMtx(input)){
 			newnode = input.child.map(function(x) {
 				return cp.tree2DArray(x).arr;
 			});
-			return newnode;
+			return {"type": "mtx", "data": newnode } ;
 		} else if (this.isVect(input)){
-			return cp.tree2DArray(input).arr;
+			return {"type": "vect", "data": cp.tree2DArray(input).arr };
+		} else if (input.child.length == 0 && assignments[input.name]){
+			return assignments[input.name];
 		}
-		return newnode;
+		var lower = input.child.map(function (x) {
+			return cp.mtxCollect(x, assignments);
+		});
+		if (input.name == "reduce" && lower.length == 1) {
+			var mtx = lower[0].data.map(function(row) {
+				return row.map(function(cell){
+					return mc.ll.num(cell);
+				});
+			});
+			return {"type": "mtx", "data": mc.reduce(mtx) };
+		}
+		throw("unknown type: " + input.name + ", args: " + lower.length);
 	}
 
 	this.mtxARead = function(input) {
@@ -418,7 +432,7 @@ function DefaultLL() {
 	this.order = function(a,b) { return a < b; }
 	this.multInv = function(x) { return 1/x; }
 	this.addInv = function(x) { return -x; }
-	this.num = function(x) { return x; }
+	this.num = function(x) { return parseFloat(x); }
 }
 
 function CoefLL(low) {

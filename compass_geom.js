@@ -222,6 +222,18 @@ function ConstructParse() {
 			});
 			return {"type": "mtx", "data": mc.reduce(mtx) };
 		}
+		if (input.name == "mult" && lower.length > 1) {
+			var mtx = assocFoldr(lower, function(a,b) {
+				if (a.type == "mtx" && b.type == "mtx") {
+					return {"type":"mtx", data: mc.mtxMult(a.data,b.data)};
+				} else if (a.type == "mtx" && b.type == "vect") {
+					return {"type":"vect", data: mc.mtxVectMult(a.data,b.data)};
+				} else {
+					throw ("no multiplication: ("+a.type+","+b.type+")");
+				}
+			});
+			return mtx;
+		}
 		throw("unknown type: " + input.name + ", args: " + lower.length);
 	}
 

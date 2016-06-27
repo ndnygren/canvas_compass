@@ -180,10 +180,10 @@ function ConstructParse() {
 		return stack[0];
 	}
 
-	this.tree2DArray = function(input) {
+	this.tree2DArray = function(input, mc) {
 		var output = {"name":input.name, arr:[]};
 		output.arr = input.child.map(function (col) {
-			return col.name;
+			return mc.ll.num(col.name);
 		});
 
 		return output;
@@ -203,11 +203,11 @@ function ConstructParse() {
 		var mc = new MtxCalc();
 		if (this.isMtx(input)){
 			newnode = input.child.map(function(x) {
-				return cp.tree2DArray(x).arr;
+				return cp.tree2DArray(x, mc).arr;
 			});
 			return {"type": "mtx", "data": newnode } ;
 		} else if (this.isVect(input)){
-			return {"type": "vect", "data": cp.tree2DArray(input).arr };
+			return {"type": "vect", "data": cp.tree2DArray(input, mc).arr };
 		} else if (input.child.length == 0 && assignments[input.name]){
 			return assignments[input.name];
 		}
@@ -215,11 +215,7 @@ function ConstructParse() {
 			return cp.mtxCollect(x, assignments);
 		});
 		if (input.name == "reduce" && lower.length == 1) {
-			var mtx = lower[0].data.map(function(row) {
-				return row.map(function(cell){
-					return mc.ll.num(cell);
-				});
-			});
+			var mtx = lower[0].data;
 			return {"type": "mtx", "data": mc.reduce(mtx) };
 		}
 		if (input.name == "mult" && lower.length > 1) {
@@ -228,6 +224,17 @@ function ConstructParse() {
 					return {"type":"mtx", data: mc.mtxMult(a.data,b.data)};
 				} else if (a.type == "mtx" && b.type == "vect") {
 					return {"type":"vect", data: mc.mtxVectMult(a.data,b.data)};
+				} else {
+					throw ("no multiplication: ("+a.type+","+b.type+")");
+				}
+			});
+			return mtx;
+		} else if (input.name == "add" && lower.length > 1) {
+			var mtx = assocFoldr(lower, function(a,b) {
+				if (a.type == "mtx" && b.type == "mtx") {
+					return {"type":"mtx", data: mc.mtxAdd(a.data,b.data)};
+				} else if (a.type == "vect" && b.type == "vect") {
+					return {"type":"vect", data: mc.vectAdd(a.data,b.data)};
 				} else {
 					throw ("no multiplication: ("+a.type+","+b.type+")");
 				}

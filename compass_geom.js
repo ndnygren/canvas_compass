@@ -236,7 +236,19 @@ function ConstructParse() {
 				} else if (a.type == "vect" && b.type == "vect") {
 					return {"type":"vect", data: mc.vectAdd(a.data,b.data)};
 				} else {
-					throw ("no multiplication: ("+a.type+","+b.type+")");
+					throw ("no addition: ("+a.type+","+b.type+")");
+				}
+			});
+			return mtx;
+		}
+		else if (input.name == "tensor" && lower.length > 1) {
+			var mtx = assocFoldr(lower, function(a,b) {
+				if (a.type == "mtx" && b.type == "mtx") {
+					return {"type":"mtx", data: mc.mtxTensor(a.data,b.data)};
+				} else if (a.type == "vect" && b.type == "vect") {
+					return {"type":"vect", data: mc.vectTensor(a.data,b.data)};
+				} else {
+					throw ("no tensor: ("+a.type+","+b.type+")");
 				}
 			});
 			return mtx;

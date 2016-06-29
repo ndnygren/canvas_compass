@@ -32,9 +32,29 @@
 			var cp = new ConstructParse();
 			var gt = new geomTests();
 			var pc = new ProjectiveCalc();
+			var mc = new MtxCalc(new ComplexLL(new FracLL()));
 			var input_text = document.getElementById("input_box").value;
 			var assignments = cp.mtxARead(input_text);
-			document.getElementById("output_div").innerHTML = JSON.stringify(assignments);
+			document.getElementById("output_div").innerHTML = "";
+			for (var key in assignments) {
+				document.getElementById("output_div").innerHTML
+					+= key + " = ";
+				if (assignments[key].type == "mtx") {
+					document.getElementById("output_div").innerHTML
+						+= JSON.stringify(assignments[key].data.map(function(x) {
+								return x.map(function(cell) {
+										return mc.ll.LaTeX(cell);
+									});
+								}));
+				}
+				if (assignments[key].type == "vect") {
+					document.getElementById("output_div").innerHTML
+						+= JSON.stringify(assignments[key].data.map(function(x) {
+							return mc.ll.LaTeX(x);
+						}));
+				}
+				document.getElementById("output_div").innerHTML += "<br/>\n";
+			}
 			document.getElementById("test_div").innerHTML = gt.runTests();
 			localStorage.setItem("mtx_construction",input_text);
 			return false;

@@ -200,7 +200,7 @@ function ConstructParse() {
 	this.mtxCollect = function(input, assignments) {
 		var newnode = undefined;
 		var cp = this;
-		var mc = new MtxCalc();
+		var mc = new MtxCalc(new ComplexLL(new FracLL()));
 		if (this.isMtx(input)){
 			newnode = input.child.map(function(x) {
 				return cp.tree2DArray(x, mc).arr;
@@ -464,6 +464,7 @@ function DefaultLL() {
 	this.multInv = function(x) { return 1/x; }
 	this.addInv = function(x) { return -x; }
 	this.num = function(x) { return parseFloat(x); }
+	this.LaTeX = function(x) { return x; }
 }
 
 function CoefLL(low) {
@@ -511,6 +512,13 @@ function CoefLL(low) {
 	this.multInv = function(x) { throw("No multiplicative inverses for polynomials: " + JSON.stringify(x)); }
 	this.addInv = function(x) { var ll = this.ll; return x.map(function(y) {return ll.addInv(y); }); }
 	this.num = function(x) { return [this.ll.num(x)]; }
+	this.LaTeX = function(x) {
+		var ll = this.ll;
+		var output = x.map(function (y) {
+			return ll.LaTeX(y);
+		});
+		return "[" + assocFoldr(output, function(a,b) {return a+","+b;}) + "]";
+	}
 }
 
 function ComplexLL(low) {
@@ -531,16 +539,29 @@ function ComplexLL(low) {
 	}
 	this.addInv = function(x) { return {"r":this.ll.addInv(x.r), "c":this.ll.addInv(x.c)}; }
 	this.num = function(x) { return {"r":this.ll.num(x), "c":this.ll.zero}; }
+	this.LaTeX = function(x) {
+		var ll = this.ll;
+		var output = "";
+		output += ll.singleEqual(x.r, ll.zero)  && !ll.singleEqual(x.c, ll.zero)? "" : ll.LaTeX(x.r);
+		output += !ll.singleEqual(x.r, ll.zero) && !ll.singleEqual(x.c, ll.zero) ? " + " : "";
+		output += ll.singleEqual(x.c, ll.zero) ? "" : ll.LaTeX(x.c) + "i";
+		return output;
+	}
 }
 
 function FracLL(low) {
 	this.ll = !low ? new DefaultLL() : low;
 	this.zero = {"n": this.ll.zero, "d":this.ll.one};
 	this.one = {"n": this.ll.one, "d":this.ll.one};
-	this.singleAdd = function (a,b) {
-		return {"n": this.ll.singleAdd(this.ll.singleMult(a.n,b.d),this.ll.singleMult(b.n,a.d)), "d": this.ll.singleMult(a.d,b.d) };
+	this.reduce = function(x) {
+		var pc = new PolyCalc();
+		var g = this.ll.multInv(pc.gcd(x.n, x.d));
+		return {"n": this.ll.singleMult(x.n,g), "d": this.ll.singleMult(x.d,g)};
 	}
-	this.singleMult = function (a,b) { return {"n":this.ll.singleMult(a.n,b.n), "d":this.ll.singleMult(a.d,b.d)}; }
+	this.singleAdd = function (a,b) {
+		return this.reduce({"n": this.ll.singleAdd(this.ll.singleMult(a.n,b.d),this.ll.singleMult(b.n,a.d)), "d": this.ll.singleMult(a.d,b.d) });
+	}
+	this.singleMult = function (a,b) { return this.reduce({"n":this.ll.singleMult(a.n,b.n), "d":this.ll.singleMult(a.d,b.d)}); }
 	this.singleEqual = function(a,b) { return this.ll.singleEqual(this.ll.singleMult(a.n,b.d), this.ll.singleMult(b.n,a.d)); }
 	this.abs = function(x) { return this.ll.abs(x.n)/this.ll.abs(x.d); }
 	this.order = function(a,b) { return this.ll.order(this.ll.singleMult(a.n,b.d), this.ll.singleMult(b.n,a.d)); }
@@ -550,6 +571,13 @@ function FracLL(low) {
 		var pc = new PolyCalc();
 		var temp = pc.rat(x);
 		return {"n":this.ll.num(temp.n),"d":this.ll.num(temp.d)};
+	}
+	this.LaTeX = function(x) {
+		var ll = this.ll;
+		if (ll.singleEqual(x.n, ll.zero) || ll.singleEqual(x.d, ll.one)) {
+			return ll.LaTeX(x.n);
+		}
+		return "\\frac{"+ll.LaTeX(x.n)+"}{"+ll.LaTeX(x.d)+"}";
 	}
 }
 

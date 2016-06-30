@@ -538,7 +538,22 @@ function ComplexLL(low) {
 		return {"r": this.ll.singleMult(x.r,denom), "c": this.ll.singleMult(this.ll.addInv(x.c),denom)};
 	}
 	this.addInv = function(x) { return {"r":this.ll.addInv(x.r), "c":this.ll.addInv(x.c)}; }
-	this.num = function(x) { return {"r":this.ll.num(x), "c":this.ll.zero}; }
+	this.num = function(x) {
+		var cp = new ConstructParse();
+		var cl = this;
+		if (!isNaN(x)) {
+			return {"r":this.ll.num(parseFloat(x)), "c":this.ll.zero};
+		}
+		var output = this.zero;
+		var parts = x.split("+").map(function(a) { return cp.trim(a); });
+		parts = parts.map(function(a) {
+			if (a[a.length-1] == "i") {
+				return {"r": cl.ll.zero, "c": cl.ll.num(a.substr(0,a.length-1))};
+			}
+			return {"r": cl.ll.num(a), "c": cl.ll.zero };
+		});
+		return assocFoldr(parts, function(a,b) { return cl.singleAdd(a,b); });
+	}
 	this.LaTeX = function(x) {
 		var ll = this.ll;
 		var output = "";

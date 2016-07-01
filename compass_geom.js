@@ -253,6 +253,9 @@ function ConstructParse() {
 			});
 			return mtx;
 		}
+		else if (input.name == "char" && lower.length == 1 && lower[0].type == "mtx") {
+			return {"type":"vect", "data":mc.characteristic(lower[0].data)};
+		}
 		throw("unknown type: " + input.name + ", args: " + lower.length);
 	}
 
@@ -484,7 +487,7 @@ function CoefLL(low) {
 	this.singleMult = function (lhs,rhs) {
 		var output = [];
 		for (var i = 0; i < lhs.length+rhs.length-1; i++) {
-			output.push(0);
+			output.push(this.ll.zero);
 		}
 		for (var i = 0; i < lhs.length; i++) {
 			for (var j = 0; j < rhs.length; j++) {

@@ -1,13 +1,13 @@
 
 function assocFoldr(list, func) {
-	if (!list || list.length == 0) {
+	if (!list || list.length === 0) {
 		throw("assocFoldr does not take empty list.");
 	}
 	var output = list[0];
 	for (var i = 1; i < list.length; i++) {
 		output = func(output, list[i]);
 	}
-	return output
+	return output;
 }
 
 function zippr(lhs, rhs, func) {
@@ -45,62 +45,57 @@ function CTNode(input) {
 	this.equalTo = function(rhs) {
 		if (this.name != rhs.name) { return false; }
 		if (this.child.length != rhs.child.length) { return false; }
-		if (this.child.length == 0) { return true; }
+		if (this.child.length === 0) { return true; }
 		return assocFoldr(zippr(this.child, rhs.child, function(a,b) {
 			return a.equalTo(b);
 		}), function (a,b) { return a && b; } );
-	}
+	};
 
 	this.geomValid = function() {
 		if (this.name == "point") { return this.pointValid(); }
 		else if (this.name == "line") { return this.lineValid(); }
 		else if (this.name == "circle") { return this.circleValid(); }
 		else { return false; }
-	}
+	};
 
 	this.pointValid = function() {
 		if (this.name != "point") { return false; }
 		else if (this.child.length != 2) { return false; }
-		else if (!isNaN(this.child[0].name)
-				&& !isNaN(this.child[1].name))
+		else if (!isNaN(this.child[0].name) && !isNaN(this.child[1].name))
 		{ return true; }
-		else if (this.child[0].lineOrCircleValid()
-				&& this.child[1].lineOrCircleValid())
+		else if (this.child[0].lineOrCircleValid() && this.child[1].lineOrCircleValid())
 		{ return true; }
 		return false;
-	}
+	};
 
 	this.lineOrCircleValid = function() {
 		return this.lineValid() || this.circleValid();
-	}
+	};
 
 	this.lineValid = function() {
 		if (this.name != "line") { return false; }
 		else if (this.child.length != 2) { return false; }
 		return this.child[0].pointValid() && this.child[1].pointValid();
-	}
+	};
 
 	this.circleValid = function() {
 		if (this.name != "circle") { return false; }
 		else if (this.child.length != 2) { return false; }
 		return this.child[0].pointValid() && this.child[1].pointValid();
-	}
+	};
 
 	this.collect = function(cache, assignments) {
 		var pc = new ProjectiveCalc();
 		var newnode;
-		if (this.name == "point"
-			&& this.child.length == 2
-			&& !isNaN(this.child[0].name)
-			&& !isNaN(this.child[1].name)) {
+		if (this.name == "point" && this.child.length == 2 && !isNaN(this.child[0].name) && !isNaN(this.child[1].name)) {
 				newnode = pc.pointNumeric(this.child[0].name, this.child[1].name);
 				cache.point.push(newnode);
 				return newnode;
 		}
 		newnode = pc.calcLayer(this.name, this.child.map(function(x) { return x.collect(cache,assignments); }), assignments);
-		cache[newnode["type"]].push(newnode);
+		cache[newnode.type].push(newnode);
 		return newnode;
-	}
+	};
 }
 
 function ConstructParse() {
@@ -290,88 +285,84 @@ function ProjectiveCalc() {
 	this.gauss_elim = function(mtx) {
 		for(var k = 0; k < mtx.length; k++) {
 		}
-	}
+	};
 
 	this.pointNumeric = function(x,y) {
 		return {"type": "point",
 			"x":parseFloat(x),
 			"y":parseFloat(y)
 		};
-	}
+	};
 
 	this.lineFrom2Points = function(a, b) {
-		if (a.x==b.x && a.y==b.y) {throw("Need distinct points to make a line.")}
+		if (a.x==b.x && a.y==b.y) {throw("Need distinct points to make a line."); }
 		return {"type":"line",
 			"x1":a.x,
 			"y1":a.y,
 			"x2":b.x,
 			"y2":b.y
 		};
-	}
+	};
 
 	this.circleFrom2Points = function(p1,p2) {
 		return {"type":"circle", "x":p1.x ,"y": p1.y, "r": this.d_euclid(p1,p2)};
-	}
+	};
 
 	this.heightOnLine = function(x, line) {
 		if (line.x1 == line.x2) { throw("Vertical line."); }
 		return (line.y2 - line.y1)/(line.x2 - line.x1)*(x - line.x1) + line.y1;
-	}
+	};
 
 	this.pointFrom2Lines = function(a,b) {
 		var sa = a.y2 - a.y1; //rise on a
 		var sb = b.y2 - b.y1; //rise on b
 		var na = a.x2 - a.x1; //run on a
 		var nb = b.x2 - b.x1; //run on b
-		var ma = na*a.y1 - sa*a.x1 // tidy up a
-		var mb = nb*b.y1 - sb*b.x1 // tidy up b
+		var ma = na*a.y1 - sa*a.x1; // tidy up a
+		var mb = nb*b.y1 - sb*b.x1; // tidy up b
 		if (sa*nb == sb*na) { throw("Parallel lines.");}
 		var newx = (nb*ma - na*mb) / (na*sb - nb*sa);
-		var newy = na!=0 ? this.heightOnLine(newx, a) : this.heightOnLine(newx, b);
+		var newy = na!==0 ? this.heightOnLine(newx, a) : this.heightOnLine(newx, b);
 		return this.pointNumeric(newx, newy);
-	}
+	};
 
 	this.fwdLineParam = function(line, t) {
 		var s = line.y2 - line.y1; //rise
 		var n = line.x2 - line.x1; //run
 		return this.pointNumeric(n*t + line.x1, s*t + line.y1);
-	}
+	};
 
 	this.revLineParam = function(line, point) {
 		var s = line.y2 - line.y1; //rise
 		var n = line.x2 - line.x1; //run
-		return n != 0 ? (point.x - line.x1)/n : (point.y - line.y1)/s;
-	}
+		return n !== 0 ? (point.x - line.x1)/n : (point.y - line.y1)/s;
+	};
 
 	this.d_euclid = function(p1, p2) {
 		return Math.sqrt((p1.x-p2.x)*(p1.x-p2.x) +
 				(p1.y-p2.y)*(p1.y-p2.y));
-	}
+	};
 
 	this.pointsFrom2Circles = function(a,b) {
 		var D = this.d_euclid(a,b);
 		var delta = Math.sqrt((D + a.r + b.r)*(-D + a.r + b.r)
 				*(D + -a.r + b.r)*(D + a.r + -b.r))/4.0;
-		var x1 = (a.x+b.x)/2 + (b.x-a.x)*(a.r*a.r - b.r*b.r)/(2*D*D)
-			+ 2*(a.y-b.y)*delta/D/D;
-		var x2 = (a.x+b.x)/2 + (b.x-a.x)*(a.r*a.r - b.r*b.r)/(2*D*D)
-			- 2*(a.y-b.y)*delta/D/D;
-		var y1 = (a.y+b.y)/2 + (b.y-a.y)*(a.r*a.r - b.r*b.r)/(2*D*D)
-			- 2*(a.x-b.x)*delta/D/D;
-		var y2 = (a.y+b.y)/2 + (b.y-a.y)*(a.r*a.r - b.r*b.r)/(2*D*D)
-			+ 2*(a.x-b.x)*delta/D/D;
+		var x1 = (a.x+b.x)/2 + (b.x-a.x)*(a.r*a.r - b.r*b.r)/(2*D*D) + 2*(a.y-b.y)*delta/D/D;
+		var x2 = (a.x+b.x)/2 + (b.x-a.x)*(a.r*a.r - b.r*b.r)/(2*D*D) - 2*(a.y-b.y)*delta/D/D;
+		var y1 = (a.y+b.y)/2 + (b.y-a.y)*(a.r*a.r - b.r*b.r)/(2*D*D) - 2*(a.x-b.x)*delta/D/D;
+		var y2 = (a.y+b.y)/2 + (b.y-a.y)*(a.r*a.r - b.r*b.r)/(2*D*D) + 2*(a.x-b.x)*delta/D/D;
 		//console.log("("+x1+","+y1+"),"+"("+x2+","+y2+")");
 		return [this.pointNumeric(x1,y1),
 			this.pointNumeric(x2, y2)];
-	}
+	};
 
 	this.pointFrom2Circles = function(a,b) {
 		var points = this.pointsFrom2Circles(a,b);
-		if (points.length == 0) { throw("These circles do not intersect."); }
+		if (points.length === 0) { throw("These circles do not intersect."); }
 		return points[0];
-	}
+	};
 
-	this.sign = function(x) { return x < 0 ? -1 : 1; }
+	this.sign = function(x) { return x < 0 ? -1 : 1; };
 
 	this.pointsFromLineCircle = function(line, circle) {
 		if (line.type != "line" || circle.type != "circle") {
@@ -399,19 +390,18 @@ function ProjectiveCalc() {
 
 		return [this.pointNumeric(x1, y1),
 		       this.pointNumeric(x2, y2)];
-	}
+	};
 
 	this.pointFromLineCircle = function(line, circle) {
 		var points = this.pointsFromLineCircle(line, circle);
-		if (points.length == 0) { throw("No intersection between line and circle."); }
+		if (points.length === 0) { throw("No intersection between line and circle."); }
 		if (points.length == 1) { return points[0]; }
-		else if (this.revLineParam(line, points[0])
-				< this.revLineParam(line, points[1])) {
+		else if (this.revLineParam(line, points[0]) < this.revLineParam(line, points[1])) {
 			return points[0];
 		} else {
 			return points[1];
 		}
-	}
+	};
 
 	this.calcLayer = function(root, child, assignments) {
 		if (root == "line") {
@@ -448,12 +438,12 @@ function ProjectiveCalc() {
 				return this.circleFrom2Points(child[0],child[1]);
 			}
 
-		} else if (child.length == 0 && root in assignments) {
+		} else if (child.length === 0 && root in assignments) {
 			return assignments[root];
 		}
 		console.log(JSON.stringify(assignments));
 		throw("Unhandled layer, " + root + ", with " + JSON.stringify(child));
-	}
+	};
 }
 
 function DefaultLL() {

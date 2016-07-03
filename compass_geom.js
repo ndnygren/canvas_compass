@@ -106,11 +106,11 @@ function ConstructParse() {
 			}
 		}
 		return -1;
-	}
+	};
 
 	this.trim = function(input){
 		return input.replace(/[ \t]+$/, "").replace(/^[ \t]+/, "");
-	}
+	};
 
 	this.wsClean = function(input) {
 		var output = "";
@@ -118,7 +118,7 @@ function ConstructParse() {
 			output += input[i] == "\n" ? " " : input[i];
 		}
 		return output;
-	}
+	};
 
 	this.breakOnDelim = function(input, delim) {
 		var output = [];
@@ -131,13 +131,13 @@ function ConstructParse() {
 		}
 		output.push(input.substring(last, i));
 		return output;
-	}
+	};
 
 	this.assignRead = function(input) {
 		var cp  = this;
 		var lines = cp.breakOnDelim(this.wsClean(input), ";");
 		var output = lines.filter(function(x){
-			return x.replace(/[ \t]+$/,"") != "";
+			return x.replace(/[ \t]+$/,"") !== "";
 		}).map(function(x){
 			var lr = cp.breakOnDelim(x, "=");
 			if (lr.length != 2) { throw("invalid assignment: " + x); }
@@ -147,7 +147,7 @@ function ConstructParse() {
 		});
 
 		return output;
-	}
+	};
 
 	this.read = function(input) {
 		var tree = new CTNode("top");
@@ -158,7 +158,7 @@ function ConstructParse() {
 		var newtoken = "";
 		for (cur = 0; cur < str.length && cur >= 0; next = this.nextToken(str, cur, tokens)) {
 			newtoken = next > -1 ? str.substring(cur, next) : "";
-			if (newtoken.replace(/^[,() \t]+/,"") != "") {
+			if (newtoken.replace(/^[,() \t]+/,"") !== "") {
 				stack[stack.length -1].child.push(new CTNode(newtoken));
 			}
 			if (str[next] == "(") {
@@ -173,7 +173,7 @@ function ConstructParse() {
 
 		if (stack.length != 1) { throw("stack size is " + stack.length + ". This probably means bracket imbalance."); }
 		return stack[0];
-	}
+	};
 
 	this.tree2DArray = function(input, mc) {
 		var output = {"name":input.name, arr:[]};
@@ -182,18 +182,19 @@ function ConstructParse() {
 		});
 
 		return output;
-	}
+	};
 
 	this.isVect = function(input) {
 		return input.name == "list" && input.child.length > 0 && input.child[0].name != "list";
-	}
+	};
 
 	this.isMtx = function(input) {
 		return input.name == "list" && input.child.length > 0 && input.child[0].name == "list";
-	}
+	};
 
 	this.mtxCollect = function(input, assignments) {
-		var newnode = undefined;
+		var newnode;
+		var mtx;
 		var cp = this;
 		var mc = new MtxCalc(new ComplexLL(new FracLL()));
 		if (this.isMtx(input)){
@@ -203,18 +204,18 @@ function ConstructParse() {
 			return {"type": "mtx", "data": newnode } ;
 		} else if (this.isVect(input)){
 			return {"type": "vect", "data": cp.tree2DArray(input, mc).arr };
-		} else if (input.child.length == 0 && assignments[input.name]){
+		} else if (input.child.length === 0 && assignments[input.name]){
 			return assignments[input.name];
 		}
 		var lower = input.child.map(function (x) {
 			return cp.mtxCollect(x, assignments);
 		});
 		if (input.name == "reduce" && lower.length == 1) {
-			var mtx = lower[0].data;
+			mtx = lower[0].data;
 			return {"type": "mtx", "data": mc.reduce(mtx) };
 		}
 		if (input.name == "mult" && lower.length > 1) {
-			var mtx = assocFoldr(lower, function(a,b) {
+			mtx = assocFoldr(lower, function(a,b) {
 				if (a.type == "mtx" && b.type == "mtx") {
 					return {"type":"mtx", data: mc.mtxMult(a.data,b.data)};
 				} else if (a.type == "mtx" && b.type == "vect") {
@@ -225,7 +226,7 @@ function ConstructParse() {
 			});
 			return mtx;
 		} else if (input.name == "add" && lower.length > 1) {
-			var mtx = assocFoldr(lower, function(a,b) {
+			mtx = assocFoldr(lower, function(a,b) {
 				if (a.type == "mtx" && b.type == "mtx") {
 					return {"type":"mtx", data: mc.mtxAdd(a.data,b.data)};
 				} else if (a.type == "vect" && b.type == "vect") {
@@ -237,7 +238,7 @@ function ConstructParse() {
 			return mtx;
 		}
 		else if (input.name == "tensor" && lower.length > 1) {
-			var mtx = assocFoldr(lower, function(a,b) {
+			mtx = assocFoldr(lower, function(a,b) {
 				if (a.type == "mtx" && b.type == "mtx") {
 					return {"type":"mtx", data: mc.mtxTensor(a.data,b.data)};
 				} else if (a.type == "vect" && b.type == "vect") {
@@ -252,7 +253,7 @@ function ConstructParse() {
 			return {"type":"vect", "data":mc.characteristic(lower[0].data)};
 		}
 		throw("unknown type: " + input.name + ", args: " + lower.length);
-	}
+	};
 
 	this.mtxARead = function(input) {
 		var cp = this;
@@ -265,7 +266,7 @@ function ConstructParse() {
 			return col;
 		});
 		return assig;
-	}
+	};
 
 	this.htmlDebug = function(tree) {
 		var pa = this;
@@ -278,7 +279,7 @@ function ConstructParse() {
 			output += "</ul>";
 		}
 		return output;
-	}
+	};
 }
 
 function ProjectiveCalc() {
@@ -449,15 +450,15 @@ function ProjectiveCalc() {
 function DefaultLL() {
 	this.zero = 0.0;
 	this.one = 1.0;
-	this.singleAdd = function (a,b) { return a+b; }
-	this.singleMult = function (a,b) { return a*b; }
-	this.singleEqual = function(a,b) { return Math.abs(a-b) < 0.000001; }
-	this.abs = function(x) { return Math.abs(x); }
-	this.order = function(a,b) { return a < b; }
-	this.multInv = function(x) { return 1/x; }
-	this.addInv = function(x) { return -x; }
-	this.num = function(x) { return parseFloat(x); }
-	this.LaTeX = function(x) { return x; }
+	this.singleAdd = function (a,b) { return a+b; };
+	this.singleMult = function (a,b) { return a*b; };
+	this.singleEqual = function(a,b) { return Math.abs(a-b) < 0.000001; };
+	this.abs = function(x) { return Math.abs(x); };
+	this.order = function(a,b) { return a < b; };
+	this.multInv = function(x) { return 1/x; };
+	this.addInv = function(x) { return -x; };
+	this.num = function(x) { return parseFloat(x); };
+	this.LaTeX = function(x) { return x; };
 }
 
 function CoefLL(low) {
@@ -599,7 +600,7 @@ function LLTNode(input, type) {
 		if (this.type != "num" && this.name != rhs.name) { return false; }
 		if (this.type == "num") { return ll.singleEqual(this.name,rhs.name); }
 		if (this.child.length != rhs.child.length) { return false; }
-		if (this.child.length == 0) { return true; }
+		if (this.child.length === 0) { return true; }
 		return assocFoldr(zippr(this.child, rhs.child, function(a,b) {
 			return a.equalTo(b, ll);
 		}), function (a,b) { return a && b; } );
@@ -661,7 +662,7 @@ function MtxCalc(low) {
 	this.vectEqual = function(a,b) {
 		var mc = this;
 		if (a.length != b.length) { return false; }
-		if (a.length == 0) { return true; }
+		if (a.length === 0) { return true; }
 		return assocFoldr(zippr(a,b, function(a,b) {
 			return mc.ll.singleEqual(a,b);
 		}), function(a,b) {
@@ -690,7 +691,7 @@ function MtxCalc(low) {
 	this.mtxEqual = function(a,b) {
 		var mc = this;
 		if (a.length != b.length) { return false; }
-		if (a.length == 0) { return true; }
+		if (a.length === 0) { return true; }
 		return assocFoldr(zippr(a,b, function(a,b) {
 			return mc.vectEqual(a,b);
 		}), function(a,b) {
@@ -728,7 +729,7 @@ function MtxCalc(low) {
 	}
 
 	this.cols = function(mtx) {
-		if (mtx.length == 0) { return 0;}
+		if (mtx.length === 0) { return 0;}
 		return mtx[0].length;
 	}
 
@@ -902,7 +903,7 @@ function MtxCalc(low) {
 		var temp;
 		var mtx = this.transpose(this.reduce(input));
 		for (var i = 0; i < mtx.length; i++) {
-			if (mtx[i][i] == 0) {
+			if (mtx[i][i] === 0) {
 				temp = mtx[i].map(function(x) { return mc.ll.addInv(x); });
 				temp[i] = mc.ll.one;
 				output.push(temp);
@@ -969,7 +970,7 @@ function PolyCalc() {
 	this.degree = function(arr) {
 		var max = 0;
 		for (var i=0; i < arr.length; i++) {
-			if (arr[i] != 0) { max = i; }
+			if (arr[i] !== 0) { max = i; }
 		}
 		return max;
 	}
@@ -1010,14 +1011,14 @@ function PolyCalc() {
 		var d_arr = [];
 		var remd = input, whole = 0, temp;
 		var output = {"n": 0, "d" : 1};
-		for (var i = 0; i < 5 && remd != 0; i++) {
+		for (var i = 0; i < 5 && remd !== 0; i++) {
 			whole = Math.floor(remd);
 			d_arr.push(whole);
 			remd -= whole;
 			if (Math.abs(remd) > 0.0001) { remd = 1.0 / remd; }
 			else { remd = 0; }
 		}
-		if (d_arr.length == 0) { return output; }
+		if (d_arr.length === 0) { return output; }
 		else {
 			output.n = d_arr[d_arr.length - 1];
 			d_arr.pop();
@@ -1038,22 +1039,22 @@ function PolyCalc() {
 		var accum = input;
 		for (var j = 1; j <= Math.abs(input[input.length-1]); j++) {
 			for (var i = 0; i*i <= Math.abs(input[0]); i++) {
-				if (i === 0 || (j != 0 && accum[0] % i == 0
-						&& accum[accum.length-1] % j == 0)) {
+				if (i === 0 || (j !== 0 && accum[0] % i === 0
+						&& accum[accum.length-1] % j === 0)) {
 					temp = this.coefDivide(accum, [-i, j]);
-					if (temp.r.length == 0) {
+					if (temp.r.length === 0) {
 						output.push([-i,j]);
 						accum = temp.q;
 					}
 					temp = this.coefDivide(accum, [i, j]);
-					if (temp.r.length == 0) {
+					if (temp.r.length === 0) {
 						output.push([i,j]);
 						accum = temp.q;
 					}
 				}
 			}
 		}
-		if (accum.length > 1 && output.length == 0) {
+		if (accum.length > 1 && output.length === 0) {
 			output.push(accum);
 		} else if (accum.length > 1) {
 			 output = output.concat(this.rationalRoots(accum));
@@ -1089,11 +1090,11 @@ function PolyCalc() {
 			temp = this.pairBijection(temp[1]);
 			b = temp[0];
 			a = temp[1] + 1;
-			if (input[0] % c == 0 && this.leadingCoef(input) % a == 0){
+			if (input[0] % c === 0 && this.leadingCoef(input) % a === 0){
 				comb = [[c,b,a],[-c,b,a],[c,-b,a],[-c,-b,a]];
 				result = comb.map(function (x) {return pc.coefDivide(input, x); } );
 				for (var j in result) {
-					if (result[j].r.length == 0) {
+					if (result[j].r.length === 0) {
 						return [result[j].q, comb[j]];
 					}
 				}

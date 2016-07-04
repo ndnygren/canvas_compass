@@ -474,7 +474,7 @@ function CoefLL(low) {
 			));
 		}
 		return output;
-	}
+	};
 	this.singleMult = function (lhs,rhs) {
 		var output = [];
 		for (var i = 0; i < lhs.length+rhs.length-1; i++) {
@@ -486,7 +486,7 @@ function CoefLL(low) {
 			}
 		}
 		return output;
-	}
+	};
 	this.singleEqual = function(a,b) {
 		for (var i = 0; i < a.length || i < b.length; i++) {
 			if (i >= a.length && !this.ll.singleEqual(this.ll.zero, b[i])) {
@@ -500,38 +500,38 @@ function CoefLL(low) {
 			}
 		}
 		return true;
-	}
-	this.abs = function(x) { return x.length > 0 ? this.ll.abs(x[0]) : this.ll.abs(this.ll.zero); }
-	this.order = function(a,b) { return this.ll.order(a.length, b.length); }
-	this.multInv = function(x) { throw("No multiplicative inverses for polynomials: " + JSON.stringify(x)); }
-	this.addInv = function(x) { var ll = this.ll; return x.map(function(y) {return ll.addInv(y); }); }
-	this.num = function(x) { return [this.ll.num(x)]; }
+	};
+	this.abs = function(x) { return x.length > 0 ? this.ll.abs(x[0]) : this.ll.abs(this.ll.zero); };
+	this.order = function(a,b) { return this.ll.order(a.length, b.length); };
+	this.multInv = function(x) { throw("No multiplicative inverses for polynomials: " + JSON.stringify(x)); };
+	this.addInv = function(x) { var ll = this.ll; return x.map(function(y) {return ll.addInv(y); }); };
+	this.num = function(x) { return [this.ll.num(x)]; };
 	this.LaTeX = function(x) {
 		var ll = this.ll;
 		var output = x.map(function (y) {
 			return ll.LaTeX(y);
 		});
 		return "[" + assocFoldr(output, function(a,b) {return a+","+b;}) + "]";
-	}
+	};
 }
 
 function ComplexLL(low) {
 	this.ll = !low ? new DefaultLL() : low;
 	this.zero = {"r":this.ll.zero, "c":this.ll.zero};
 	this.one = {"r":this.ll.one, "c":this.ll.zero};
-	this.singleAdd = function (a,b) { return {"r":this.ll.singleAdd(a.r,b.r), "c":this.ll.singleAdd(a.c,b.c)}; }
+	this.singleAdd = function (a,b) { return {"r":this.ll.singleAdd(a.r,b.r), "c":this.ll.singleAdd(a.c,b.c)}; };
 	this.singleMult = function (a,b) { return {"r": this.ll.singleAdd(this.ll.singleMult(a.r,b.r), this.ll.addInv(this.ll.singleMult(a.c,b.c))),
-		"c": this.ll.singleAdd(this.ll.singleMult(a.c,b.r), this.ll.singleMult(a.r,b.c))  }; }
-	this.singleEqual = function(a,b) { return  this.ll.singleEqual(a.r,b.r) && this.ll.singleEqual(a.c, b.c); }
-	this.abs = function(x) { return this.ll.abs(x.r) + this.ll.abs(x.c); }
+		"c": this.ll.singleAdd(this.ll.singleMult(a.c,b.r), this.ll.singleMult(a.r,b.c))  }; };
+	this.singleEqual = function(a,b) { return  this.ll.singleEqual(a.r,b.r) && this.ll.singleEqual(a.c, b.c); };
+	this.abs = function(x) { return this.ll.abs(x.r) + this.ll.abs(x.c); };
 	// no proper order for this
-	this.order = function(a,b) { return this.ll.order(a.r, b.r); }
+	this.order = function(a,b) { return this.ll.order(a.r, b.r); };
 	this.multInv = function(x) {
 		var denom = this.ll.singleAdd(this.ll.singleMult(x.r,x.r),this.ll.singleMult(x.c,x.c));
 		denom = this.ll.multInv(denom);
 		return {"r": this.ll.singleMult(x.r,denom), "c": this.ll.singleMult(this.ll.addInv(x.c),denom)};
-	}
-	this.addInv = function(x) { return {"r":this.ll.addInv(x.r), "c":this.ll.addInv(x.c)}; }
+	};
+	this.addInv = function(x) { return {"r":this.ll.addInv(x.r), "c":this.ll.addInv(x.c)}; };
 	this.num = function(x) {
 		var cp = new ConstructParse();
 		var cl = this;
@@ -547,7 +547,7 @@ function ComplexLL(low) {
 			return {"r": cl.ll.num(a), "c": cl.ll.zero };
 		});
 		return assocFoldr(parts, function(a,b) { return cl.singleAdd(a,b); });
-	}
+	};
 	this.LaTeX = function(x) {
 		var ll = this.ll;
 		var output = "";
@@ -555,7 +555,7 @@ function ComplexLL(low) {
 		output += !ll.singleEqual(x.r, ll.zero) && !ll.singleEqual(x.c, ll.zero) ? " + " : "";
 		output += ll.singleEqual(x.c, ll.zero) ? "" : ll.LaTeX(x.c) + "i";
 		return output;
-	}
+	};
 }
 
 function FracLL(low) {
@@ -566,28 +566,28 @@ function FracLL(low) {
 		var pc = new PolyCalc();
 		var g = this.ll.multInv(pc.gcd(x.n, x.d));
 		return {"n": this.ll.singleMult(x.n,g), "d": this.ll.singleMult(x.d,g)};
-	}
+	};
 	this.singleAdd = function (a,b) {
 		return this.reduce({"n": this.ll.singleAdd(this.ll.singleMult(a.n,b.d),this.ll.singleMult(b.n,a.d)), "d": this.ll.singleMult(a.d,b.d) });
-	}
-	this.singleMult = function (a,b) { return this.reduce({"n":this.ll.singleMult(a.n,b.n), "d":this.ll.singleMult(a.d,b.d)}); }
-	this.singleEqual = function(a,b) { return this.ll.singleEqual(this.ll.singleMult(a.n,b.d), this.ll.singleMult(b.n,a.d)); }
-	this.abs = function(x) { return this.ll.abs(x.n)/this.ll.abs(x.d); }
-	this.order = function(a,b) { return this.ll.order(this.ll.singleMult(a.n,b.d), this.ll.singleMult(b.n,a.d)); }
-	this.multInv = function(x) { return {"n": x.d, "d": x.n}; }
-	this.addInv = function(x) { return {"n": this.ll.addInv(x.n),"d": x.d}; }
+	};
+	this.singleMult = function (a,b) { return this.reduce({"n":this.ll.singleMult(a.n,b.n), "d":this.ll.singleMult(a.d,b.d)}); };
+	this.singleEqual = function(a,b) { return this.ll.singleEqual(this.ll.singleMult(a.n,b.d), this.ll.singleMult(b.n,a.d)); };
+	this.abs = function(x) { return this.ll.abs(x.n)/this.ll.abs(x.d); };
+	this.order = function(a,b) { return this.ll.order(this.ll.singleMult(a.n,b.d), this.ll.singleMult(b.n,a.d)); };
+	this.multInv = function(x) { return {"n": x.d, "d": x.n}; };
+	this.addInv = function(x) { return {"n": this.ll.addInv(x.n),"d": x.d}; };
 	this.num = function(x) {
 		var pc = new PolyCalc();
 		var temp = pc.rat(x);
 		return {"n":this.ll.num(temp.n),"d":this.ll.num(temp.d)};
-	}
+	};
 	this.LaTeX = function(x) {
 		var ll = this.ll;
 		if (ll.singleEqual(x.n, ll.zero) || ll.singleEqual(x.d, ll.one)) {
 			return ll.LaTeX(x.n);
 		}
 		return "\\frac{"+ll.LaTeX(x.n)+"}{"+ll.LaTeX(x.d)+"}";
-	}
+	};
 }
 
 function LLTNode(input, type) {
@@ -604,14 +604,14 @@ function LLTNode(input, type) {
 		return assocFoldr(zippr(this.child, rhs.child, function(a,b) {
 			return a.equalTo(b, ll);
 		}), function (a,b) { return a && b; } );
-	}
+	};
 
 	//deep copy the tree
 	this.copy = function() {
 		var output = new LLTNode(this.name,this.type);
 		output.child = this.child.map(function(x) {return x.copy(); });
 		return output;
-	}
+	};
 }
 
 function TreeLL(low) {
@@ -628,7 +628,7 @@ function TreeLL(low) {
 		output.child.push(b.copy());
 
 		return tc.assocOp(output, "add");
-	}
+	};
 	this.singleMult = function (a,b) {
 		var output = new LLTNode("mult", "func");
 		if (a.type == "num" && b.type == "num") {
@@ -638,22 +638,22 @@ function TreeLL(low) {
 		output.child.push(a.copy());
 		output.child.push(b.copy());
 		return tc.assocOp(output, "mult");
-	}
-	this.singleEqual = function(a,b) { return a.equalTo(b,this.ll); }
-	this.abs = function(x) { throw("no abs for trees yet"); }
-	this.order = function(a,b) { throw("no order for trees yet"); }
+	};
+	this.singleEqual = function(a,b) { return a.equalTo(b,this.ll); };
+	this.abs = function(x) { throw("no abs for trees yet"); };
+	this.order = function(a,b) { throw("no order for trees yet"); };
 	this.multInv = function(x) {
 		var output = new LLTNode("frac", "func");
 		output.child.push(this.one.copy());
 		output.child.push(x.copy());
 		return output;
-	}
+	};
 	this.addInv = function(x) {
 		var temp = new LLTNode("neg", "func");
 		temp.child.push(x.copy());
 		return temp;
-	}
-	this.num = function(x) { return new LLTNode(x, "num"); }
+	};
+	this.num = function(x) { return new LLTNode(x, "num"); };
 }
 
 function MtxCalc(low) {
@@ -668,7 +668,7 @@ function MtxCalc(low) {
 		}), function(a,b) {
 			return a && b;
 		});
-	}
+	};
 
 	this.vectMult = function(a,b) {
 		var mc = this;
@@ -678,7 +678,7 @@ function MtxCalc(low) {
 		}), function(a,b) {
 			return mc.ll.singleAdd(a,b);
 		});
-	}
+	};
 
 	this.vectAdd = function(a,b) {
 		var mc = this;
@@ -686,7 +686,7 @@ function MtxCalc(low) {
 		return zippr(a,b, function(a,b) {
 			return mc.ll.singleAdd(a,b);
 		});
-	}
+	};
 
 	this.mtxEqual = function(a,b) {
 		var mc = this;
@@ -697,7 +697,7 @@ function MtxCalc(low) {
 		}), function(a,b) {
 			return a && b;
 		});
-	}
+	};
 
 	this.mtxAdd = function (a,b) {
 		var mc = this;
@@ -705,33 +705,33 @@ function MtxCalc(low) {
 		return zippr(a,b, function(a,b) {
 			return mc.vectAdd(a, b);
 		});
-	}
+	};
 
 	this.scaleVect = function(s, vect) {
 		var mc = this;
 		return vect.map(function(x) { return mc.ll.singleMult(s,x); });
-	}
+	};
 
 	this.scaleMtx = function(s, mtx) {
 		var mc = this;
 		return mtx.map(function(x) {return mc.scaleVect(s,x);});
-	}
+	};
 
 	this.mtxVectMult = function(mtx, vect) {
 		var mc = this;
 		return mtx.map(function(row) { return mc.vectMult(row,vect); });
-	}
+	};
 
 	this.selectCol = function(col,mtx) {
 		return mtx.map(function(row) {
 			return row[col];
 		});
-	}
+	};
 
 	this.cols = function(mtx) {
 		if (mtx.length === 0) { return 0;}
 		return mtx[0].length;
-	}
+	};
 
 	this.mtxMult = function(m1, m2) {
 		if (this.cols(m1) != m2.length) { throw("attempting to multiply a " + m1.length + "by" + this.cols(m1) + " with a " + m2.length + "by" + this.cols(m2)); }
@@ -744,16 +744,16 @@ function MtxCalc(low) {
 			}
 		}
 		return output;
-	}
+	};
 
 	this.vectCopy = function(x) {
 		return x.map(function(x) { return x; });
-	}
+	};
 
 	this.mtxCopy = function(x) {
 		var mc = this;
 		return x.map(function(x) { return mc.vectCopy(x); });
-	}
+	};
 
 	this.makeZero = function(dim) {
 		var output = [];
@@ -764,7 +764,7 @@ function MtxCalc(low) {
 			}
 		}
 		return output;
-	}
+	};
 
 	this.makeId = function(dim) {
 		var output = this.makeZero(dim);
@@ -772,7 +772,7 @@ function MtxCalc(low) {
 			output[i][i] = this.ll.one;
 		}
 		return output;
-	}
+	};
 
 	this.swapHighestMagOnRow = function(row, mtx) {
 		var max = this.ll.abs(mtx[row][row]), maxidx = row;
@@ -784,9 +784,9 @@ function MtxCalc(low) {
 			}
 		}
 		temp = mtx[row];
-		mtx[row] = mtx[maxidx]
+		mtx[row] = mtx[maxidx];
 		mtx[maxidx] = temp;
-	}
+	};
 
 	this.reduce = function(mtx) {
 		var output = this.mtxCopy(mtx);
@@ -805,27 +805,27 @@ function MtxCalc(low) {
 			}
 		}
 		return output;
-	}
+	};
 
 	this.sideBySide = function(a,b) {
-		return zippr(a,b, function(x,y) { return x.concat(y); } )
-	}
+		return zippr(a,b, function(x,y) { return x.concat(y); } );
+	};
 
 	this.leftSplit = function(mtx, size) {
 		if (size > this.cols(mtx)) { throw ("size("+size+") must be smaller than number of columns.\n" + JSON.stringify(mtx)); }
-		return mtx.map(function(x) { return x.slice(0,size); })
-	}
+		return mtx.map(function(x) { return x.slice(0,size); });
+	};
 
 	this.rightSplit = function(mtx, size) {
 		if (size > this.cols(mtx)) { throw ("size("+size+") must be smaller than number of columns.\n" + JSON.stringify(mtx)); }
-		return mtx.map(function(x) { return x.slice(x.length-size,x.length); })
-	}
+		return mtx.map(function(x) { return x.slice(x.length-size,x.length); });
+	};
 
 	this.inverse = function(mtx) {
 		if (mtx.length != this.cols(mtx)) {throw ("only square matrices have inverses");}
 		var start = this.sideBySide(mtx, this.makeId(mtx.length));
 		return this.rightSplit(this.reduce(start), mtx.length);
-	}
+	};
 
 	this.transpose = function(mtx) {
 		var output = [];
@@ -838,12 +838,12 @@ function MtxCalc(low) {
 		}
 
 		return output;
-	}
+	};
 
 	this.submatrix = function(mtx, i, j) {
 		var output = mtx.slice(0,i).concat(mtx.slice(i+1));
-		return output.map(function(x) {return x.slice(0,j).concat(x.slice(j+1)) });
-	}
+		return output.map(function(x) {return x.slice(0,j).concat(x.slice(j+1)); });
+	};
 
 	this.mtxToPoly = function(mtx) {
 		var pc = new PolyCalc();
@@ -852,7 +852,7 @@ function MtxCalc(low) {
 				return pc.num(y);
 			});
 		});
-	}
+	};
 
 	// this is the determinant by cofactor expansion.
 	this.det = function(mtx) {
@@ -867,12 +867,12 @@ function MtxCalc(low) {
 		}
 
 		for (var i = 0; i < mtx.length; i++) {
-			parity = i%2==0 ? this.ll.one : this.ll.addInv(this.ll.one);
+			parity = i%2===0 ? this.ll.one : this.ll.addInv(this.ll.one);
 			accum = this.ll.singleAdd(accum,this.ll.singleMult(parity, this.ll.singleMult(mtx[0][i],this.det(this.submatrix(mtx,0,i)))));
 		}
 
 		return accum;
-	}
+	};
 
 	this.characteristic = function(mtx) {
 		var minusone = this.ll.addInv(this.ll.one);
@@ -887,7 +887,7 @@ function MtxCalc(low) {
 			temp[i][i].push(minusone);
 		}
 		return newmc.det(temp);
-	}
+	};
 
 	this.isZeroVect = function(input) {
 		var mc = this;
@@ -896,7 +896,7 @@ function MtxCalc(low) {
 		}), function (a,b) {
 			return a && b;
 		});
-	}
+	};
 	this.kernelSpace = function(input) {
 		var mc = this;
 		var output = [];
@@ -904,13 +904,13 @@ function MtxCalc(low) {
 		var mtx = this.transpose(this.reduce(input));
 		for (var i = 0; i < mtx.length; i++) {
 			if (mtx[i][i] === 0) {
-				temp = mtx[i].map(function(x) { return mc.ll.addInv(x); });
+				temp = mtx[i].map(mc.ll.addInv);
 				temp[i] = mc.ll.one;
 				output.push(temp);
 			}
 		}
 		return output;
-	}
+	};
 
 	this.eigenValues = function(input) {
 		var mc = this;
@@ -928,14 +928,14 @@ function MtxCalc(low) {
 			return mc.ll.singleMult(mc.ll.addInv(x[0]),mc.ll.multInv(x[1]));
 		});
 		return roots;
-	}
+	};
 	// takes a matrix and one of the previously
 	// discovered eigenvalues as argument
 	this.eigenVectors = function(input, ev) {
 		var size = input.length;
 		var mtx2 = this.mtxAdd(input, this.scaleMtx(this.ll.addInv(ev), this.makeId(size)));
 		return this.kernelSpace(mtx2);
-	}
+	};
 
 	this.vectTensor = function(lhs, rhs) {
 		var output = [];
@@ -947,7 +947,7 @@ function MtxCalc(low) {
 			}
 		}
 		return output;
-	}
+	};
 
 	this.mtxTensor = function(lhs, rhs) {
 		var mc = this;
@@ -959,7 +959,7 @@ function MtxCalc(low) {
 		});
 		output = assocFoldr(output, function(a,b) {return a.concat(b); });
 		return output;
-	}
+	};
 }
 
 function PolyCalc() {

@@ -965,7 +965,7 @@ function MtxCalc(low) {
 function PolyCalc() {
 	this.isConst = function(input) {
 		return this.degree(input)+1 <= 1;
-	}
+	};
 
 	this.degree = function(arr) {
 		var max = 0;
@@ -973,12 +973,12 @@ function PolyCalc() {
 			if (arr[i] !== 0) { max = i; }
 		}
 		return max;
-	}
+	};
 
 	this.leadingCoef = function (arr) {
 		var max = this.degree(arr);
 		return arr.length > max ? arr[max] : 0;
-	}
+	};
 
 	// Euclidean division of polynomials
 	this.coefDivide = function (num,denom) {
@@ -1004,7 +1004,7 @@ function PolyCalc() {
 		}
 
 		return output;
-	}
+	};
 
 	// floating point to integer pair conversion using continued fractions.
 	this.rat = function(input) {
@@ -1031,7 +1031,7 @@ function PolyCalc() {
 		}
 
 		return output;
-	}
+	};
 
 	this.rationalRoots = function(input) {
 		var output = [];
@@ -1061,7 +1061,8 @@ function PolyCalc() {
 		}
 
 		return output;
-	}
+	};
+
 	this.gcd = function(a,b) {
 		var l = Math.max(Math.abs(a), Math.abs(b));
 		var r = Math.min(Math.abs(a), Math.abs(b));
@@ -1072,11 +1073,12 @@ function PolyCalc() {
 			r = temp;
 		}
 		return l;
-	}
+	};
+
 	this.gcdArray = function(arr) {
 		var pc = this;
 		return assocFoldr(arr, pc.gcd);
-	}
+	};
 
 	// find the quadratic factors of a coef array polynomial.
 	// specifcally the ones without rational roots.
@@ -1101,24 +1103,25 @@ function PolyCalc() {
 			}
 		}
 		return [input];
-	}
+	};
 
 	this.factor = function (input) {
 		var pc = this;
 		var fact = this.rationalRoots(input).map(function(x) {return pc.findQuadFactors(x);});
 		return assocFoldr(fact, function(a,b){return a.concat(b);});
-	}
+	};
 
 	this.pairBijection = function(x) {
 		var n = Math.floor(Math.sqrt(2*x + 1/4) - 1/2);
 		var r = x - (n*n+n)/2;
 		var l = n - r;
 		return [l,r];
-	}
+	};
+
 	this.pairBijectionRev = function(l,r) {
 		var n = l+r;
 		return ((n*n+n)/2) +r;
-	}
+	};
 
 	this.coefNormalize = function(arr) {
 		var mc = new MtxCalc();
@@ -1129,7 +1132,7 @@ function PolyCalc() {
 		var g = this.gcdArray(temp);
 		if (temp[temp.length-1] < 0) { g *= -1; }
 		return temp.map(function(x) { return x / g; });
-	}
+	};
 }
 
 function TreeCalc() {
@@ -1150,7 +1153,7 @@ function TreeCalc() {
 			}
 		}
 		return output;
-	}
+	};
 
 	this.commuteOp = function(tree, opname) {
 		var output = tree.copy();
@@ -1169,7 +1172,7 @@ function TreeCalc() {
 		}
 
 		return output;
-	}
+	};
 
 	this.distrib_help = function(lhs, rhs, multop) {
 		var output = lhs.copy();
@@ -1185,7 +1188,7 @@ function TreeCalc() {
 		}
 
 		return output;
-	}
+	};
 
 	this.distributeOps = function(tree, multop, addop) {
 		var output = tree.copy();
@@ -1223,7 +1226,7 @@ function TreeCalc() {
 		}
 
 		return output;
-	}
+	};
 
 	this.reduce = function(tree, ll) {
 		var output = tree.copy();
@@ -1253,6 +1256,6 @@ function TreeCalc() {
 		}
 
 		return output;
-	}
+	};
 }
 

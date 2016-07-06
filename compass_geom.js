@@ -477,11 +477,12 @@ function CoefLL(low) {
 	};
 	this.singleMult = function (lhs,rhs) {
 		var output = [];
-		for (var i = 0; i < lhs.length+rhs.length-1; i++) {
+		var i,j;
+		for (i = 0; i < lhs.length+rhs.length-1; i++) {
 			output.push(this.ll.zero);
 		}
-		for (var i = 0; i < lhs.length; i++) {
-			for (var j = 0; j < rhs.length; j++) {
+		for (i = 0; i < lhs.length; i++) {
+			for (j = 0; j < rhs.length; j++) {
 				output[i+j] = this.ll.singleAdd(output[i+j], this.ll.singleMult(lhs[i], rhs[j]));
 			}
 		}
@@ -538,7 +539,6 @@ function ComplexLL(low) {
 		if (!isNaN(x)) {
 			return {"r":this.ll.num(parseFloat(x)), "c":this.ll.zero};
 		}
-		var output = this.zero;
 		var parts = x.split("+").map(function(a) { return cp.trim(a); });
 		parts = parts.map(function(a) {
 			if (a[a.length-1] == "i") {
@@ -987,19 +987,20 @@ function PolyCalc() {
 		var d = this.degree(denom);
 		var c = this.leadingCoef(denom);
 		var s, mag;
+		var i;
 
 		while (this.degree(output.r) >= d) {
 			s = this.leadingCoef(output.r)/c;
 			mag = this.degree(output.r)-d;
 			output.q[mag] = output.q[mag] ? output.q[mag] + s : s;
-			for (var i = 0; i < denom.length; i++) {
+			for (i = 0; i < denom.length; i++) {
 				output.r[i+mag] -= s*denom[i];
 			}
 		}
-		for (var i = 0; i < output.q.length; i++) {
-			output.q[i] = output.q[i] == null ? 0 : output.q[i];
+		for (i = 0; i < output.q.length; i++) {
+			output.q[i] = !output.q[i] ? 0 : output.q[i];
 		}
-		while (output.r.length > 0 && output.r[output.r.length-1]==0) {
+		while (output.r.length > 0 && output.r[output.r.length-1] === 0) {
 			output.r.pop();
 		}
 
@@ -1011,7 +1012,9 @@ function PolyCalc() {
 		var d_arr = [];
 		var remd = input, whole = 0, temp;
 		var output = {"n": 0, "d" : 1};
-		for (var i = 0; i < 5 && remd !== 0; i++) {
+		var i;
+
+		for (i = 0; i < 5 && remd !== 0; i++) {
 			whole = Math.floor(remd);
 			d_arr.push(whole);
 			remd -= whole;
@@ -1023,7 +1026,7 @@ function PolyCalc() {
 			output.n = d_arr[d_arr.length - 1];
 			d_arr.pop();
 		}
-		for (var i = d_arr.length - 1; i>= 0; i--) {
+		for (i = d_arr.length - 1; i>= 0; i--) {
 			temp = output.n;
 			output.n = output.d;
 			output.d = temp;
@@ -1039,8 +1042,7 @@ function PolyCalc() {
 		var accum = input;
 		for (var j = 1; j <= Math.abs(input[input.length-1]); j++) {
 			for (var i = 0; i*i <= Math.abs(input[0]); i++) {
-				if (i === 0 || (j !== 0 && accum[0] % i === 0
-						&& accum[accum.length-1] % j === 0)) {
+				if (i === 0 || (j !== 0 && accum[0] % i === 0 && accum[accum.length-1] % j === 0)) {
 					temp = this.coefDivide(accum, [-i, j]);
 					if (temp.r.length === 0) {
 						output.push([-i,j]);
@@ -1124,9 +1126,8 @@ function PolyCalc() {
 	};
 
 	this.coefNormalize = function(arr) {
-		var mc = new MtxCalc();
-		var numers = arr.map(function(x) {return x[0]["n"][0]; });
-		var denoms = arr.map(function(x) {return x[0]["d"][0]; });
+		var numers = arr.map(function(x) {return x[0].n[0]; });
+		var denoms = arr.map(function(x) {return x[0].d[0]; });
 		var global_d = assocFoldr(denoms, function(a,b) {return a*b;});
 		var temp = numers.map(function (x) { return x*global_d; });
 		var g = this.gcdArray(temp);
@@ -1139,7 +1140,6 @@ function TreeCalc() {
 	this.assocOp = function(tree, opname) {
 		var tc = this;
 		var output = new LLTNode(tree.name, tree.type);
-		var temp;
 
 		output.child = tree.child.map(function (x) {
 			return tc.assocOp(x, opname);
@@ -1166,7 +1166,7 @@ function TreeCalc() {
 		if (output.name == opname) {
 			temp = classifyr(output.child, function(x) {return x.type;});
 			output.child = [];
-			for (var i in temp) {
+			for (var i = 0; i < temp.length; i++) {
 				output.child = output.child.concat(temp[i]);
 			}
 		}
@@ -1202,7 +1202,7 @@ function TreeCalc() {
 		});
 
 		if (tree.name == multop && tree.type == "func") {
-			classes = classifyr(output.child, function (x) { return x.name == addop && x.type == "func"});
+			classes = classifyr(output.child, function (x) { return x.name == addop && x.type == "func"; });
 			if (classes.length < 2) { return output; }
 			else if (classes[0][0].name != addop) {
 				addlist = classes[1];
@@ -1232,26 +1232,27 @@ function TreeCalc() {
 		var output = tree.copy();
 		var tc = this;
 		var tl = new TreeLL(ll);
-		var temp = [];
 		var classes, ops = {};
 		output.child = output.child.map(function (x) {
 			return tc.reduce(x, ll);
 		});
 
-		ops["add"] = function(a,b) {return tl.singleAdd(a,b);}
-		ops["mult"] = function(a,b) { return tl.singleMult(a,b);}
+		ops.add = function(a,b) {return tl.singleAdd(a,b); };
+		ops.mult = function(a,b) { return tl.singleMult(a,b); };
 
 		if (tree.type == "func") {
 			classes = classifyr(output.child, function(x) { return x.type; });
-			output.child = [];
-			for (var i in classes) {
-				if (classes[i][0].type == "num") {
-					temp = [assocFoldr(classes[i], ops[tree.name])];
+			output.child = assocFoldr(classes.map(function(x){
+				var temp = [];
+				if (x[0].type == "num") {
+					temp = [assocFoldr(x, ops[tree.name])];
 				} else {
-					temp = classes[i];
+					temp = x;
 				}
-				output.child = output.child.concat(temp);
-			}
+				return temp;
+			}), function(a,b) {
+				return a.concat(b);
+			});
 			if (output.child.length == 1) { return output.child[0]; }
 		}
 

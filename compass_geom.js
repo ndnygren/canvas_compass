@@ -346,8 +346,7 @@ function ProjectiveCalc() {
 
 	this.pointsFrom2Circles = function(a,b) {
 		var D = this.d_euclid(a,b);
-		var delta = Math.sqrt((D + a.r + b.r)*(-D + a.r + b.r)
-				*(D + -a.r + b.r)*(D + a.r + -b.r))/4.0;
+		var delta = Math.sqrt((D + a.r + b.r)*(-D + a.r + b.r) *(D + -a.r + b.r)*(D + a.r + -b.r))/4.0;
 		var x1 = (a.x+b.x)/2 + (b.x-a.x)*(a.r*a.r - b.r*b.r)/(2*D*D) + 2*(a.y-b.y)*delta/D/D;
 		var x2 = (a.x+b.x)/2 + (b.x-a.x)*(a.r*a.r - b.r*b.r)/(2*D*D) - 2*(a.y-b.y)*delta/D/D;
 		var y1 = (a.y+b.y)/2 + (b.y-a.y)*(a.r*a.r - b.r*b.r)/(2*D*D) - 2*(a.x-b.x)*delta/D/D;
@@ -373,24 +372,15 @@ function ProjectiveCalc() {
 			this.pointNumeric(line.x2, line.y2));
 		var dx = line.x2-line.x1;
 		var dy = line.y2-line.y1;
-		var D = (line.x1-circle.x)*(line.y2-circle.y)
-			- (line.x2-circle.x)*(line.y1-circle.y);
+		var D = (line.x1-circle.x)*(line.y2-circle.y) - (line.x2-circle.x)*(line.y1-circle.y);
 		if (circle.r*circle.r*d*d - D*D < 0) { return []; }
 
-		var x1 = (D*dy
-			+ this.sign(dy)*dx*
-				Math.sqrt(circle.r*circle.r*d*d - D*D))
-			/ (d*d) + circle.x;
-		var x2 = (D*dy - this.sign(dy)*dx*Math.sqrt(circle.r*circle.r*d*d - D*D))
-			/ (d*d) + circle.x;
-		var y1 = (-D*dx + Math.abs(dy)*Math.sqrt(circle.r*circle.r*d*d - D*D))
-			/ (d*d) + circle.y;
-		var y2 = (-D*dx - Math.abs(dy)*Math.sqrt(circle.r*circle.r*d*d - D*D))
-			/ (d*d) + circle.y;
+		var x1 = (D*dy + this.sign(dy)*dx* Math.sqrt(circle.r*circle.r*d*d - D*D)) / (d*d) + circle.x;
+		var x2 = (D*dy - this.sign(dy)*dx*Math.sqrt(circle.r*circle.r*d*d - D*D)) / (d*d) + circle.x; var y1 = (-D*dx + Math.abs(dy)*Math.sqrt(circle.r*circle.r*d*d - D*D)) / (d*d) + circle.y;
+		var y2 = (-D*dx - Math.abs(dy)*Math.sqrt(circle.r*circle.r*d*d - D*D)) / (d*d) + circle.y;
 		//console.log("("+x1+","+y1+"),"+"("+x2+","+y2+")");
 
-		return [this.pointNumeric(x1, y1),
-		       this.pointNumeric(x2, y2)];
+		return [this.pointNumeric(x1, y1), this.pointNumeric(x2, y2)];
 	};
 
 	this.pointFromLineCircle = function(line, circle) {
@@ -411,31 +401,21 @@ function ProjectiveCalc() {
 			}
 		}
 		else if (root == "point") {
-			if (child.length == 2
-				&& child[0].type == "line"
-				&& child[1].type == "line") {
+			if (child.length == 2 && child[0].type == "line" && child[1].type == "line") {
 				return this.pointFrom2Lines(child[0],child[1]);
 			}
-			else if (child.length == 2
-				&& child[0].type == "circle"
-				&& child[1].type == "circle") {
+			else if (child.length == 2 && child[0].type == "circle" && child[1].type == "circle") {
 				return this.pointFrom2Circles(child[0],child[1]);
 			}
-			else if (child.length == 2
-				&& child[0].type == "line"
-				&& child[1].type == "circle") {
+			else if (child.length == 2 && child[0].type == "line" && child[1].type == "circle") {
 				return this.pointFromLineCircle(child[0],child[1]);
 			}
-			else if (child.length == 2
-				&& child[0].type == "circle"
-				&& child[1].type == "line") {
+			else if (child.length == 2 && child[0].type == "circle" && child[1].type == "line") {
 				return this.pointFromLineCircle(child[1],child[0]);
 			}
 		}
 		else if (root == "circle") {
-			if (child.length == 2
-				&& child[0].type == "point"
-				&& child[1].type == "point") {
+			if (child.length == 2 && child[0].type == "point" && child[1].type == "point") {
 				return this.circleFrom2Points(child[0],child[1]);
 			}
 
@@ -1096,7 +1076,8 @@ function PolyCalc() {
 			a = temp[1] + 1;
 			if (input[0] % c === 0 && this.leadingCoef(input) % a === 0){
 				comb = [[c,b,a],[-c,b,a],[c,-b,a],[-c,-b,a]];
-				result = comb.map(function (x) {return pc.coefDivide(input, x); } );
+				result = [ pc.coefDivide(input, comb[0]), pc.coefDivide(input, comb[1]), pc.coefDivide(input, comb[2]), pc.coefDivide(input, comb[3])
+					];
 				for (var j in result) {
 					if (result[j].r.length === 0) {
 						return [result[j].q, comb[j]];

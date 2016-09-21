@@ -214,6 +214,15 @@ function ConstructParse() {
 			mtx = lower[0].data;
 			return {"type": "mtx", "data": mc.reduce(mtx) };
 		}
+		if (input.name == "trans" && lower.length == 1) {
+			if (lower[0].type == "mtx") {
+				mtx = {"type":"mtx", data: mc.transpose(lower[0].data)};
+			} else {
+				throw ("no transpose: ("+lower[0].type+")");
+			}
+
+			return mtx;
+		}
 		if (input.name == "mult" && lower.length > 1) {
 			mtx = assocFoldr(lower, function(a,b) {
 				if (a.type == "mtx" && b.type == "mtx") {

@@ -223,6 +223,15 @@ function ConstructParse() {
 
 			return mtx;
 		}
+		if (input.name == "outer" && lower.length == 2) {
+			if (lower[0].type == "vect" && lower[1].type == "vect") {
+				mtx = {"type":"mtx", data: mc.mtxMult(mc.transpose([lower[0].data]),([lower[1].data]))};
+			} else {
+				throw ("no outer: ("+lower[0].type +","+ lower[1].type+")");
+			}
+
+			return mtx;
+		}
 		if (input.name == "mult" && lower.length > 1) {
 			mtx = assocFoldr(lower, function(a,b) {
 				if (a.type == "mtx" && b.type == "mtx") {

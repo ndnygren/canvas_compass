@@ -145,7 +145,6 @@ function ConstructParse() {
 			tree.name = cp.trim(lr[0]);
 			return {"name": tree.name, "tree": tree };
 		});
-
 		return output;
 	};
 
@@ -169,6 +168,9 @@ function ConstructParse() {
 				stack.pop();
 			}
 			cur = next;
+		}
+		if (stack[stack.length-1].child.length == 0 && str.substring(cur, str.length).replace(/^[,() \t]+/,"") != "") {
+			stack[stack.length-1].child.push(new CTNode(str.substring(cur, str.length).replace(/^[,() \t]+/,"")));
 		}
 
 		if (stack.length != 1) { throw("stack size is " + stack.length + ". This probably means bracket imbalance."); }
@@ -197,7 +199,9 @@ function ConstructParse() {
 		var mtx;
 		var cp = this;
 		var mc = new MtxCalc(new ComplexLL(new FracLL()));
-		if (this.isMtx(input)){
+		if (input.child.length === 0 && !isNaN(input.name)){
+			return {"type": "number", "data": mc.ll.num(input.name) };
+		} else if (this.isMtx(input)){
 			newnode = input.child.map(function(x) {
 				return cp.tree2DArray(x, mc).arr;
 			});
@@ -207,6 +211,7 @@ function ConstructParse() {
 		} else if (input.child.length === 0 && assignments[input.name]){
 			return assignments[input.name];
 		}
+
 		var lower = input.child.map(function (x) {
 			return cp.mtxCollect(x, assignments);
 		});
@@ -265,6 +270,16 @@ function ConstructParse() {
 					throw ("no tensor: ("+a.type+","+b.type+")");
 				}
 			});
+			return mtx;
+		}
+		else if (input.name == "scale" && lower.length == 2) {
+			if (lower[0].type == "number" && lower[1].type == "mtx") {
+				return {"type":"mtx", data: mc.scaleMtx(lower[0].data,lower[1].data)};
+			} else if (lower[0].type == "number" && lower[1].type == "vect") {
+				return {"type":"vect", data: mc.scaleVect(lower[0].data,lower[1].data)};
+			} else {
+				throw ("no scale: ("+a.type+","+b.type+")");
+			}
 			return mtx;
 		}
 		else if (input.name == "char" && lower.length == 1 && lower[0].type == "mtx") {

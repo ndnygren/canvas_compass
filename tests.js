@@ -586,5 +586,12 @@ function geomTests() {
 		var temp = classifyr([1,2,3,4,5,6,7,8], function(x) { return x%5; });
 		return temp.length == 5;
 	});
+	this.tests.push(function() {
+		var cp = new ConstructParse();
+		var mc = new MtxCalc(new ComplexLL(new FracLL()));
+		var assign = cp.mtxARead("ID = [[1,0],[0,1]];X = [[0,1],[1,0]];XX=mult(X,X);");
+		console.log(assign);
+		return !mc.mtxEqual(assign["X"].data,assign["ID"].data) && mc.mtxEqual(assign["XX"].data,assign["ID"].data);
+	});
 }
 

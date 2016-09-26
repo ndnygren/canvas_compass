@@ -237,6 +237,15 @@ function ConstructParse() {
 
 			return mtx;
 		}
+		if (input.name == "conj" && lower.length == 1) {
+			if (lower[0].type == "vect") {
+				mtx = {"type":"vect", data: lower[0].data.map(function(x) { return mc.ll.conj(x); }) };
+			} else {
+				throw ("no outer: ("+lower[0].type +","+ lower[1].type+")");
+			}
+
+			return mtx;
+		}
 		if (input.name == "mult" && lower.length > 1) {
 			mtx = assocFoldr(lower, function(a,b) {
 				if (a.type == "mtx" && b.type == "mtx") {
@@ -546,6 +555,7 @@ function ComplexLL(low) {
 		return {"r": this.ll.singleMult(x.r,denom), "c": this.ll.singleMult(this.ll.addInv(x.c),denom)};
 	};
 	this.addInv = function(x) { return {"r":this.ll.addInv(x.r), "c":this.ll.addInv(x.c)}; };
+	this.conj = function(x) { return {"r":this.ll.singleMult(this.ll.one,x.r), "c":this.ll.addInv(x.c)}; };
 	this.num = function(x) {
 		var cp = new ConstructParse();
 		var cl = this;

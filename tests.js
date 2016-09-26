@@ -593,5 +593,13 @@ function geomTests() {
 		console.log(assign);
 		return !mc.mtxEqual(assign["X"].data,assign["ID"].data) && mc.mtxEqual(assign["XX"].data,assign["ID"].data);
 	});
+	this.tests.push(function() {
+		var cp = new ConstructParse();
+		var mc = new MtxCalc(new ComplexLL(new FracLL()));
+		var assign = cp.mtxARead("t1 = [1, 0+1i]; t2 = conj(t1); t3=[1, 0+-1i]");
+		console.log(assign);
+		return !mc.vectEqual(assign["t1"].data,assign["t2"].data) && mc.vectEqual(assign["t2"].data,assign["t3"].data);
+	});
+
 }
 

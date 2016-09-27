@@ -240,6 +240,9 @@ function ConstructParse() {
 		if (input.name == "conj" && lower.length == 1) {
 			if (lower[0].type == "vect") {
 				mtx = {"type":"vect", data: lower[0].data.map(function(x) { return mc.ll.conj(x); }) };
+			} else if (lower[0].type == "mtx") {
+				mtx = {"type":"mtx", data: lower[0].data.map(function(x) {
+					return x.map(function(y) { return mc.ll.conj(y); }); }) };
 			} else {
 				throw ("no outer: ("+lower[0].type +","+ lower[1].type+")");
 			}

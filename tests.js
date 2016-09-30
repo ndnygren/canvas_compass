@@ -595,6 +595,18 @@ function geomTests() {
 	this.tests.push(function() {
 		var cp = new ConstructParse();
 		var mc = new MtxCalc(new ComplexLL(new FracLL()));
+		var assign = cp.mtxARead("A = [[1,2],[3,4]];B = [[1,3],[2,4]];C=trans(A);");
+		return !mc.mtxEqual(assign["A"].data,assign["B"].data) && mc.mtxEqual(assign["B"].data,assign["C"].data);
+	});
+	this.tests.push(function() {
+		var cp = new ConstructParse();
+		var mc = new MtxCalc(new ComplexLL(new FracLL()));
+		var assign = cp.mtxARead("A = [[1,2],[3,4]];B = [[1,3],[2,4]];C=add(A,B);D=[[2,5],[5,8]]");
+		return !mc.mtxEqual(assign["A"].data,assign["C"].data) && mc.mtxEqual(assign["C"].data,assign["D"].data);
+	});
+	this.tests.push(function() {
+		var cp = new ConstructParse();
+		var mc = new MtxCalc(new ComplexLL(new FracLL()));
 		var assign = cp.mtxARead("t1 = [1, 0+1i]; t2 = conj(t1); t3=[1, 0+-1i]");
 		return !mc.vectEqual(assign["t1"].data,assign["t2"].data) && mc.vectEqual(assign["t2"].data,assign["t3"].data);
 	});

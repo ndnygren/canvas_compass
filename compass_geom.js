@@ -986,6 +986,22 @@ function MtxCalc(low) {
 		output = assocFoldr(output, function(a,b) {return a.concat(b); });
 		return output;
 	};
+
+	this.mtxLaTeX = function(mtx) {
+		var mc = this;
+		var conv = mtx.map(function (row) {
+			return assocFoldr(row.map(function(cell) {
+				return mc.ll.LaTeX(cell);
+			}), function(a,b) { return a + " & " + b; }); });
+		return "\\begin{pmatrix}"+assocFoldr(conv, function(rowa, rowb) { return rowa + " \\\\ " + rowb;}) + "\\end{pmatrix}";
+	}
+
+	this.vectLaTeX = function(mtx) {
+		var mc = this;
+		var conv = mtx.map(function (cell) {
+				return mc.ll.LaTeX(cell); });
+		return "\\begin{pmatrix}"+assocFoldr(conv, function(rowa, rowb) { return rowa + " \\\\ " + rowb;}) + "\\end{pmatrix}";
+	}
 }
 
 function PolyCalc() {

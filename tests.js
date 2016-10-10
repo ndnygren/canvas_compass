@@ -616,6 +616,18 @@ function geomTests() {
 		var assign = cp.mtxARead("Y = [[0,0+-1i],[0+1i,0]]; Yb = trans(Y); Yd = conj(Yb);");
 		return !mc.mtxEqual(assign["Y"].data,assign["Yb"].data) && mc.mtxEqual(assign["Y"].data,assign["Yd"].data);
 	});
+	this.tests.push(function() {
+		var mc = new MtxCalc(new ComplexLL(new FracLL()));
+		var vect = [mc.ll.num(1),mc.ll.num(2),mc.ll.num(3)];
+		var correct = "\\begin{pmatrix}1 \\\\ 2 \\\\ 3\\end{pmatrix}";
+		return mc.vectLaTeX(vect) == correct;
+	});
+	this.tests.push(function() {
+		var mc = new MtxCalc(new ComplexLL(new FracLL()));
+		var mtx = [[mc.ll.num(1),mc.ll.num(2)],[mc.ll.num(3),mc.ll.num(4)]];
+		var correct = "\\begin{pmatrix}1 & 2 \\\\ 3 & 4\\end{pmatrix}";
+		return mc.mtxLaTeX(mtx) == correct;
+	});
 
 }
 

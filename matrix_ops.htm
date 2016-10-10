@@ -41,17 +41,11 @@
 					+= key + " = ";
 				if (assignments[key].type == "mtx") {
 					document.getElementById("output_div").innerHTML
-						+= JSON.stringify(assignments[key].data.map(function(x) {
-								return x.map(function(cell) {
-										return mc.ll.LaTeX(cell);
-									});
-								}));
+						+= mc.mtxLaTeX(assignments[key].data);
 				}
 				if (assignments[key].type == "vect") {
 					document.getElementById("output_div").innerHTML
-						+= JSON.stringify(assignments[key].data.map(function(x) {
-							return mc.ll.LaTeX(x);
-						}));
+						+= mc.vectLaTeX(assignments[key].data);
 				}
 				document.getElementById("output_div").innerHTML += "<br/>\n";
 			}

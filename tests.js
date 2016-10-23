@@ -448,6 +448,12 @@ function geomTests() {
 		var ev = mc.eigenVectors(mtx,13);
 		return mc.vectEqual(mc.mtxVectMult(mtx,ev[0]),mc.scaleVect(13, ev[0]));
 	});
+	this.tests.push(function () {
+	    var mc = new MtxCalc();
+	    var mtx = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+	    var ev = mc.eigenVectors(mtx, 1);
+	    return mc.vectEqual(mc.mtxVectMult(mtx, ev[0]), mc.scaleVect(1, ev[0]));
+	});
 	this.tests.push(function() {
 		var mc = new MtxCalc();
 		var v1 = [0.5, 0.5];
